@@ -1,0 +1,45 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #app {
+  width: 100%;
+  height: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: #f8f9fa;
+}
+
+/* Flat design - NO rounded corners, shadows, or gradients */
+button, input, textarea, select {
+  border-radius: 0 !important;
+}
+
+.mantine-Button-root {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.mantine-Paper-root {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.mantine-TextInput-input,
+.mantine-Textarea-input,
+.mantine-NumberInput-input {
+  border-radius: 0 !important;
+}
+
+/* Disable all Mantine shadows */
+[class*="shadow"] {
+  box-shadow: none !important;
+}
+
