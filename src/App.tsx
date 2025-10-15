@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
+import Router, { route } from 'preact-router';
 import { InvoiceTemplate } from './components/InvoiceTemplate';
 import { FloatingChat } from './components/FloatingChat';
 import { Toolbar } from './components/Toolbar';
@@ -56,7 +57,11 @@ export function App() {
         } catch (error) {
           console.error('Failed to initialize AI session:', error);
           setAiAvailable(false);
+          route('/setup');
         }
+      } else {
+        // Redirect to setup page if AI is not available
+        route('/setup');
       }
     };
 
@@ -234,15 +239,37 @@ export function App() {
       return;
     }
 
-    // For multiple invoices, we would need a different export strategy
-    // For now, show a message
-    const infoMsg: ChatMessage = {
-      id: `system-${Date.now()}`,
-      role: 'assistant',
-      content: `PDF export is currently disabled for multiple invoices. You have ${invoices.length} invoice(s) created.`,
-      timestamp: Date.now(),
-    };
-    setMessages((prev) => [...prev, infoMsg]);
+    try {
+      // Import the export function
+      const { exportMultipleInvoicesToPDF } = await import('./lib/pdf-export');
+      
+      // Get all invoice IDs
+      const invoiceIds = invoices.map(inv => `invoice-${inv.id}`);
+      
+      // Generate filename
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = invoices.length === 1 
+        ? `invoice-${timestamp}.pdf`
+        : `invoices-${timestamp}.pdf`;
+      
+      await exportMultipleInvoicesToPDF(invoiceIds, filename);
+      
+      const successMsg: ChatMessage = {
+        id: `system-${Date.now()}`,
+        role: 'assistant',
+        content: `Successfully exported ${invoices.length} invoice${invoices.length > 1 ? 's' : ''} to PDF!`,
+        timestamp: Date.now(),
+      };
+      setMessages((prev) => [...prev, successMsg]);
+    } catch (error) {
+      const errorMsg: ChatMessage = {
+        id: `system-${Date.now()}`,
+        role: 'assistant',
+        content: 'Failed to export PDF. Please try again.',
+        timestamp: Date.now(),
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+    }
   };
 
   const handleReset = () => {
@@ -260,31 +287,25 @@ export function App() {
     }
   };
 
-  // Show loading state while checking AI
-  if (aiAvailable === null) {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100vh',
-          fontFamily: 'Inter, sans-serif',
-          fontSize: '18px',
-          color: '#6b7280',
-        }}
-      >
-        Initializing AI...
-      </div>
-    );
-  }
+  // Loading component
+  const LoadingScreen = ({ path }: { path?: string }) => (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        fontFamily: 'Inter, sans-serif',
+        fontSize: '18px',
+        color: '#6b7280',
+      }}
+    >
+      Initializing AI...
+    </div>
+  );
 
-  // Show demo simulation if AI is not available
-  if (aiAvailable === false) {
-    return <DemoSimulation />;
-  }
-
-  return (
+  // Main invoice app component
+  const InvoiceApp = ({ path }: { path?: string }) => (
     <>
       {/* Toolbar */}
       <Toolbar
@@ -451,16 +472,27 @@ export function App() {
       </div>
 
       {/* Floating Chat */}
-      {aiAvailable && (
-        <FloatingChat
-          messages={messages}
-          onSendMessage={handleSendMessage}
-          isProcessing={isProcessing}
-          examplePromptToType={examplePromptToType}
-          onExampleTypingComplete={() => setExamplePromptToType(null)}
-        />
-      )}
+      <FloatingChat
+        messages={messages}
+        onSendMessage={handleSendMessage}
+        isProcessing={isProcessing}
+        examplePromptToType={examplePromptToType}
+        onExampleTypingComplete={() => setExamplePromptToType(null)}
+      />
     </>
+  );
+
+  return (
+    <Router>
+      {aiAvailable === null ? (
+        <LoadingScreen path="/" />
+      ) : aiAvailable === true ? (
+        <InvoiceApp path="/" />
+      ) : (
+        <DemoSimulation path="/" />
+      )}
+      <DemoSimulation path="/setup" />
+    </Router>
   );
 }
 

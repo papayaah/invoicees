@@ -45,10 +45,17 @@ export function FloatingChat({ messages, onSendMessage, isProcessing, examplePro
           setInput(examplePromptToType.slice(0, index));
           requestAnimationFrame(animate);
         } else {
-          // Typing complete, notify parent
-          if (onExampleTypingComplete) {
-            onExampleTypingComplete();
-          }
+          // Typing complete, wait a moment then auto-submit
+          setTimeout(() => {
+            if (!isProcessing) {
+              onSendMessage(examplePromptToType);
+              setInput('');
+            }
+            // Notify parent to clear the example
+            if (onExampleTypingComplete) {
+              onExampleTypingComplete();
+            }
+          }, 500); // Small delay so user can see the full text before submission
         }
       };
       
@@ -57,7 +64,7 @@ export function FloatingChat({ messages, onSendMessage, isProcessing, examplePro
       setInput('');
       requestAnimationFrame(animate);
     }
-  }, [examplePromptToType]);
+  }, [examplePromptToType, isOpen, isProcessing, onSendMessage, onExampleTypingComplete]);
 
   const handleSubmit = (e: Event) => {
     e.preventDefault();
@@ -276,7 +283,16 @@ export function FloatingChat({ messages, onSendMessage, isProcessing, examplePro
         <textarea
           value={input}
           onInput={(e) => setInput((e.target as HTMLTextAreaElement).value)}
-          placeholder="Type your message..."
+          onKeyDown={(e) => {
+            // Submit on Cmd+Enter (Mac) or Ctrl+Enter (Windows/Linux)
+            if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+              e.preventDefault();
+              if (input.trim() && !isProcessing) {
+                handleSubmit(e);
+              }
+            }
+          }}
+          placeholder="Type your message... (Cmd/Ctrl+Enter to send)"
           disabled={isProcessing}
           rows={2}
           style={{

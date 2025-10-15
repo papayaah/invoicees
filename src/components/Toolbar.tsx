@@ -1,6 +1,6 @@
 import { useState } from 'preact/hooks';
 import { InvoiceLayout } from '@/types/invoice';
-import { IconFileDownload, IconRefresh, IconChevronUp, IconChevronDown, IconX } from '@tabler/icons-react';
+import { IconFileDownload, IconRefresh, IconChevronUp, IconChevronDown, IconX, IconHeart } from '@tabler/icons-react';
 
 interface ToolbarProps {
   currentLayout: InvoiceLayout;
@@ -80,8 +80,8 @@ export function Toolbar({ currentLayout, onLayoutChange, onExportPDF, onReset }:
 
             {/* Left/Right Layout */}
             <div style={{
-              display: 'grid',
-              gridTemplateColumns: '200px 1fr',
+              display: 'flex',
+              flexWrap: 'wrap',
               gap: '32px',
               alignItems: 'center',
             }}>
@@ -92,6 +92,8 @@ export function Toolbar({ currentLayout, onLayoutChange, onExportPDF, onReset }:
                 borderRadius: '8px',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
                 transform: 'rotate(-2deg)',
+                flexShrink: 0,
+                width: '200px',
               }}>
                 <img 
                   src="/family.jpg" 
@@ -107,15 +109,20 @@ export function Toolbar({ currentLayout, onLayoutChange, onExportPDF, onReset }:
                   fontFamily: 'Permanent Marker, cursive',
                   fontSize: '14px',
                   textAlign: 'center',
-                  color: '#4b5563',
+                  color: '#e57373',
                   marginTop: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
                 }}>
-                  My Family ❤️
+                  <IconHeart size={16} stroke="#e57373" fill="#e57373" />
+                  My Inspiration
                 </div>
               </div>
 
               {/* Right - About Content */}
-              <div>
+              <div style={{ flex: 1, minWidth: '250px' }}>
                 <h2 style={{
                   fontSize: '24px',
                   fontWeight: '700',
@@ -143,7 +150,7 @@ export function Toolbar({ currentLayout, onLayoutChange, onExportPDF, onReset }:
                   color: '#4b5563',
                 }}>
                   Thank you so much for using Invoicees. It truly means the world to me! 
-                  I hope it saves you time and brings a little joy to your workflow. 💜
+                  I hope it saves you time and brings a little joy to your workflow.
                 </p>
               </div>
             </div>
@@ -168,12 +175,12 @@ export function Toolbar({ currentLayout, onLayoutChange, onExportPDF, onReset }:
           style={{
             position: 'fixed',
             bottom: '40px', // Fixed vertical position
-            right: polaroidPeeking ? '-76px' : '10px', // Slide horizontally only, right edge at browser edge
+            right: polaroidPeeking ? '-70px' : '0px', // Slide horizontally only, shows ~1/4 when peeking
             background: 'white',
             padding: '8px 8px 20px 8px',
             borderRadius: '8px',
             cursor: 'pointer',
-            zIndex: 100,
+            zIndex: 2500,
             fontFamily: 'Permanent Marker, cursive',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
             transform: 'rotate(-2deg)',
@@ -195,9 +202,13 @@ export function Toolbar({ currentLayout, onLayoutChange, onExportPDF, onReset }:
           <div style={{
             fontSize: '10px',
             textAlign: 'center',
-            color: '#4b5563',
+            color: '#e57373',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '4px',
           }}>
-            Made with ❤️
+            Made with <IconHeart size={12} stroke="#e57373" fill="#e57373" />
           </div>
         </div>
 
@@ -253,7 +264,7 @@ export function Toolbar({ currentLayout, onLayoutChange, onExportPDF, onReset }:
         width: '320px',
         maxHeight: '80vh',
         overflowY: 'auto',
-        zIndex: 100,
+        zIndex: 2000,
         fontFamily: 'Inter, sans-serif',
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
       }}

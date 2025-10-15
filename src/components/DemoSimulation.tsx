@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
-import { IconSparkles, IconX, IconAlertCircle, IconCircleCheck, IconSend } from '@tabler/icons-react';
+import { IconSparkles, IconX, IconAlertCircle, IconCircleCheck, IconSend, IconHeart } from '@tabler/icons-react';
 
 interface DemoSimulationProps {
+  path?: string; // For preact-router
   onComplete?: () => void;
 }
 
@@ -13,6 +14,29 @@ export function DemoSimulation(_props: DemoSimulationProps) {
   const [showAbout, setShowAbout] = useState(false);
   const [polaroidPeeking, setPolaroidPeeking] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Add CSS animations for send button
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes shake-and-glow {
+        0%, 16%, 100% { transform: translateX(0); }
+        2%, 6%, 10%, 14% { transform: translateX(-5px); }
+        4%, 8%, 12% { transform: translateX(5px); }
+      }
+      @keyframes pulse-glow {
+        0%, 100% { box-shadow: 0 0 10px rgba(168, 85, 247, 0.5), 0 0 20px rgba(168, 85, 247, 0.3); }
+        50% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.8), 0 0 40px rgba(168, 85, 247, 0.5); }
+      }
+      .demo-send-button-active {
+        animation: shake-and-glow 5s ease-in-out infinite, pulse-glow 2s ease-in-out infinite;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
   
   const demoPrompt = "Invoice for Acme Corp from Tech Solutions Inc. $2500 for Website Development Services. Bank name: Chase Bank, Account: 123456789, Routing: 021000021";
   
@@ -95,26 +119,6 @@ export function DemoSimulation(_props: DemoSimulationProps) {
           maxWidth: '1200px',
           margin: '0 auto',
         }}>
-          {/* Alert Banner */}
-          <div style={{
-            background: '#fef3c7',
-            border: '2px solid #fbbf24',
-            borderRadius: '12px',
-            padding: '20px',
-            marginBottom: '40px',
-            fontSize: '15px',
-            color: '#92400e',
-            textAlign: 'center',
-            fontWeight: '600',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-          }}>
-            <IconAlertCircle size={20} stroke="#92400e" />
-            Chrome Built-in AI is not available. Try the demo or enable it to use Invoicees!
-          </div>
-
           {/* Two Column Layout */}
           <div style={{
             display: 'grid',
@@ -125,7 +129,7 @@ export function DemoSimulation(_props: DemoSimulationProps) {
             {/* Left Column - Demo */}
             <div style={{
               background: 'white',
-              borderRadius: '16px',
+              borderRadius: '0',
               padding: '40px',
               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
             }}>
@@ -133,7 +137,7 @@ export function DemoSimulation(_props: DemoSimulationProps) {
                 width: '60px',
                 height: '60px',
                 background: 'linear-gradient(135deg, #a855f7 0%, #8b5cf6 100%)',
-                borderRadius: '50%',
+                borderRadius: '0',
                 margin: '0 auto 24px',
                 display: 'flex',
                 alignItems: 'center',
@@ -173,7 +177,7 @@ export function DemoSimulation(_props: DemoSimulationProps) {
                   background: 'linear-gradient(135deg, #a855f7 0%, #8b5cf6 100%)',
                   color: 'white',
                   border: 'none',
-                  borderRadius: '12px',
+                  borderRadius: '0',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
@@ -190,10 +194,28 @@ export function DemoSimulation(_props: DemoSimulationProps) {
             {/* Right Column - Setup Instructions */}
             <div style={{
               background: 'white',
-              borderRadius: '16px',
+              borderRadius: '0',
               padding: '40px',
               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
             }}>
+              {/* Alert Banner - moved inside right column */}
+              <div style={{
+                background: '#fef3c7',
+                border: '2px solid #fbbf24',
+                borderRadius: '0',
+                padding: '16px',
+                marginBottom: '24px',
+                fontSize: '14px',
+                color: '#92400e',
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}>
+                <IconAlertCircle size={20} stroke="#92400e" />
+                Chrome Built-in AI is not available. Try the demo or enable it to use Invoicees!
+              </div>
+
               <h2 style={{
                 fontSize: '24px',
                 fontWeight: '700',
@@ -217,7 +239,7 @@ export function DemoSimulation(_props: DemoSimulationProps) {
                 <div style={{
                   background: '#f9fafb',
                   border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
+                  borderRadius: '0',
                   padding: '16px',
                   marginBottom: '12px',
                 }}>
@@ -234,7 +256,7 @@ export function DemoSimulation(_props: DemoSimulationProps) {
                     color: '#1f2937',
                     background: '#f3f4f6',
                     padding: '6px 10px',
-                    borderRadius: '4px',
+                    borderRadius: '0',
                     display: 'block',
                     wordBreak: 'break-all',
                     fontFamily: 'monospace',
@@ -249,7 +271,7 @@ export function DemoSimulation(_props: DemoSimulationProps) {
                 <div style={{
                   background: '#f9fafb',
                   border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
+                  borderRadius: '0',
                   padding: '16px',
                   marginBottom: '12px',
                 }}>
@@ -266,7 +288,7 @@ export function DemoSimulation(_props: DemoSimulationProps) {
                     color: '#1f2937',
                     background: '#f3f4f6',
                     padding: '6px 10px',
-                    borderRadius: '4px',
+                    borderRadius: '0',
                     display: 'block',
                     wordBreak: 'break-all',
                     fontFamily: 'monospace',
@@ -281,7 +303,7 @@ export function DemoSimulation(_props: DemoSimulationProps) {
                 <div style={{
                   background: '#f9fafb',
                   border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
+                  borderRadius: '0',
                   padding: '16px',
                   marginBottom: '12px',
                 }}>
@@ -298,7 +320,7 @@ export function DemoSimulation(_props: DemoSimulationProps) {
                     color: '#1f2937',
                     background: '#f3f4f6',
                     padding: '6px 10px',
-                    borderRadius: '4px',
+                    borderRadius: '0',
                     display: 'block',
                     wordBreak: 'break-all',
                     fontFamily: 'monospace',
@@ -314,7 +336,7 @@ export function DemoSimulation(_props: DemoSimulationProps) {
 
               <div style={{
                 background: '#f3f4f6',
-                borderRadius: '8px',
+                borderRadius: '0',
                 padding: '12px',
                 fontSize: '13px',
                 color: '#4b5563',
@@ -360,12 +382,12 @@ export function DemoSimulation(_props: DemoSimulationProps) {
           style={{
             position: 'fixed',
             bottom: '40px', // Fixed vertical position
-            right: polaroidPeeking ? '-65px' : '0px', // Slide horizontally only, right edge at browser edge
+            right: polaroidPeeking ? '-60px' : '0px', // Slide horizontally only, shows ~1/4 when peeking
             background: 'white',
             padding: '8px 8px 20px 8px',
             borderRadius: '8px',
             cursor: 'pointer',
-            zIndex: 100,
+            zIndex: 2500,
             fontFamily: 'Permanent Marker, cursive',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
             transform: 'rotate(-2deg)',
@@ -387,9 +409,13 @@ export function DemoSimulation(_props: DemoSimulationProps) {
           <div style={{
             fontSize: '10px',
             textAlign: 'center',
-            color: '#4b5563',
+            color: '#e57373',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '4px',
           }}>
-            Made with ❤️
+            Made with <IconHeart size={12} stroke="#e57373" fill="#e57373" />
           </div>
         </div>
 
@@ -447,8 +473,8 @@ export function DemoSimulation(_props: DemoSimulationProps) {
 
               {/* Left/Right Layout */}
               <div style={{
-                display: 'grid',
-                gridTemplateColumns: '200px 1fr',
+                display: 'flex',
+                flexWrap: 'wrap',
                 gap: '32px',
                 alignItems: 'center',
               }}>
@@ -456,9 +482,11 @@ export function DemoSimulation(_props: DemoSimulationProps) {
                 <div style={{
                   background: 'white',
                   padding: '12px 12px 32px 12px',
-                  borderRadius: '8px',
+                  borderRadius: '0',
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
                   transform: 'rotate(-2deg)',
+                  flexShrink: 0,
+                  width: '200px',
                 }}>
                   <img 
                     src="/family.jpg" 
@@ -474,15 +502,20 @@ export function DemoSimulation(_props: DemoSimulationProps) {
                     fontFamily: 'Permanent Marker, cursive',
                     fontSize: '14px',
                     textAlign: 'center',
-                    color: '#4b5563',
+                    color: '#e57373',
                     marginTop: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
                   }}>
-                    My Family ❤️
+                    <IconHeart size={16} stroke="#e57373" fill="#e57373" />
+                    My Inspiration
                   </div>
                 </div>
 
                 {/* Right - About Content */}
-                <div>
+                <div style={{ flex: 1, minWidth: '250px' }}>
                   <h2 style={{
                     fontSize: '24px',
                     fontWeight: '700',
@@ -510,7 +543,7 @@ export function DemoSimulation(_props: DemoSimulationProps) {
                     color: '#4b5563',
                   }}>
                     Thank you so much for using Invoicees. It truly means the world to me! 
-                    I hope it saves you time and brings a little joy to your workflow. 💜
+                    I hope it saves you time and brings a little joy to your workflow.
                   </p>
                 </div>
               </div>
@@ -538,12 +571,12 @@ export function DemoSimulation(_props: DemoSimulationProps) {
           style={{
             position: 'fixed',
             bottom: '40px', // Fixed vertical position
-            right: polaroidPeeking ? '-76px' : '10px', // Slide horizontally only, right edge at browser edge
+            right: polaroidPeeking ? '-60px' : '0px', // Slide horizontally only, shows ~1/4 when peeking
             background: 'white',
             padding: '8px 8px 20px 8px',
             borderRadius: '8px',
             cursor: 'pointer',
-            zIndex: 100,
+            zIndex: 2500,
             fontFamily: 'Permanent Marker, cursive',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
             transform: 'rotate(-2deg)',
@@ -565,9 +598,13 @@ export function DemoSimulation(_props: DemoSimulationProps) {
           <div style={{
             fontSize: '10px',
             textAlign: 'center',
-            color: '#4b5563',
+            color: '#e57373',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '4px',
           }}>
-            Made with ❤️
+            Made with <IconHeart size={12} stroke="#e57373" fill="#e57373" />
           </div>
         </div>
 
@@ -667,8 +704,8 @@ export function DemoSimulation(_props: DemoSimulationProps) {
 
               {/* Left/Right Layout */}
               <div style={{
-                display: 'grid',
-                gridTemplateColumns: '200px 1fr',
+                display: 'flex',
+                flexWrap: 'wrap',
                 gap: '32px',
                 alignItems: 'center',
               }}>
@@ -676,9 +713,11 @@ export function DemoSimulation(_props: DemoSimulationProps) {
                 <div style={{
                   background: 'white',
                   padding: '12px 12px 32px 12px',
-                  borderRadius: '8px',
+                  borderRadius: '0',
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
                   transform: 'rotate(-2deg)',
+                  flexShrink: 0,
+                  width: '200px',
                 }}>
                   <img 
                     src="/family.jpg" 
@@ -694,15 +733,20 @@ export function DemoSimulation(_props: DemoSimulationProps) {
                     fontFamily: 'Permanent Marker, cursive',
                     fontSize: '14px',
                     textAlign: 'center',
-                    color: '#4b5563',
+                    color: '#e57373',
                     marginTop: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
                   }}>
-                    My Family ❤️
+                    <IconHeart size={16} stroke="#e57373" fill="#e57373" />
+                    My Inspiration
                   </div>
                 </div>
 
                 {/* Right - About Content */}
-                <div>
+                <div style={{ flex: 1, minWidth: '250px' }}>
                   <h2 style={{
                     fontSize: '24px',
                     fontWeight: '700',
@@ -730,7 +774,7 @@ export function DemoSimulation(_props: DemoSimulationProps) {
                     color: '#4b5563',
                   }}>
                     Thank you so much for using Invoicees. It truly means the world to me! 
-                    I hope it saves you time and brings a little joy to your workflow. 💜
+                    I hope it saves you time and brings a little joy to your workflow.
                   </p>
                 </div>
               </div>
@@ -931,7 +975,7 @@ export function DemoSimulation(_props: DemoSimulationProps) {
                   color: 'white',
                   fontSize: '13px',
                   lineHeight: '1.4',
-                  borderRadius: '8px',
+                  borderRadius: '0',
                 }}>
                   {sentMessage}
                 </div>
@@ -949,7 +993,7 @@ export function DemoSimulation(_props: DemoSimulationProps) {
                   padding: '8px 12px',
                   background: 'white',
                   border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
+                  borderRadius: '0',
                   fontSize: '13px',
                   color: '#1f2937',
                 }}>
@@ -968,7 +1012,7 @@ export function DemoSimulation(_props: DemoSimulationProps) {
                   padding: '8px 12px',
                   background: 'white',
                   border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
+                  borderRadius: '0',
                   fontSize: '13px',
                   color: '#1f2937',
                   display: 'flex',
@@ -1015,6 +1059,7 @@ export function DemoSimulation(_props: DemoSimulationProps) {
             <button
               onClick={handleSendMessage}
               disabled={!typingComplete || step !== 'typing'}
+              className={typingComplete && step === 'typing' ? 'demo-send-button-active' : ''}
               style={{
                 background: (typingComplete && step === 'typing') ? '#a855f7' : '#d1d5db',
                 color: 'white',
@@ -1026,6 +1071,7 @@ export function DemoSimulation(_props: DemoSimulationProps) {
                 justifyContent: 'center',
                 borderRadius: '6px',
                 flexShrink: 0,
+                transition: 'background 0.3s ease',
               }}
             >
               <IconSend size={18} />

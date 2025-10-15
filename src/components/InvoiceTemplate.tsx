@@ -26,7 +26,7 @@ export function InvoiceTemplate({ invoice, layout }: InvoiceTemplateProps) {
   };
 
   return (
-    <div id="invoice-template" style={{ background: '#ffffff' }}>
+    <div id={`invoice-${invoice.id}`} style={{ background: '#ffffff' }}>
       {renderLayout()}
     </div>
   );
