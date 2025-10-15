@@ -167,8 +167,8 @@ export function Toolbar({ currentLayout, onLayoutChange, onExportPDF, onReset }:
           onMouseLeave={() => setPolaroidPeeking(true)}
           style={{
             position: 'fixed',
-            bottom: polaroidPeeking ? '-60px' : '20px', // Slide up/down
-            right: polaroidPeeking ? '-40px' : '20px', // Slide in/out
+            bottom: '40px', // Fixed vertical position
+            right: polaroidPeeking ? '-76px' : '10px', // Slide horizontally only, right edge at browser edge
             background: 'white',
             padding: '8px 8px 20px 8px',
             borderRadius: '8px',
@@ -177,7 +177,7 @@ export function Toolbar({ currentLayout, onLayoutChange, onExportPDF, onReset }:
             fontFamily: 'Permanent Marker, cursive',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
             transform: 'rotate(-2deg)',
-            transition: 'right 0.3s ease, bottom 0.3s ease, transform 0.2s, box-shadow 0.2s',
+            transition: 'right 0.3s ease, transform 0.2s, box-shadow 0.2s',
           }}
           title="About Invoicees"
         >
