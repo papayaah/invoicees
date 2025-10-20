@@ -3,6 +3,7 @@ import Router, { route } from 'preact-router';
 import { InvoiceTemplate } from './components/InvoiceTemplate';
 import { FloatingChat } from './components/FloatingChat';
 import { Toolbar } from './components/Toolbar';
+import { WorkInProgressRibbon } from './components/WorkInProgressRibbon';
 import { IconDownload, IconTrash, IconBookmark, IconBookmarkOff } from '@tabler/icons-react';
 import { DemoSimulation } from './components/DemoSimulation';
 import { useInvoice } from './hooks/useInvoice';
@@ -135,7 +136,7 @@ export function App() {
 
     // Create a new invoice for each prompt
     const newInvoice = addNewInvoice();
-    setGeneratingInvoiceId(newInvoice.id);
+    setGeneratingInvoiceId(newInvoice.id || null);
 
     try {
       let session = getGlobalSession();
@@ -294,8 +295,25 @@ export function App() {
     }
   };
 
+  const handleExportSingle = async (invoice: typeof invoices[number]) => {
+    try {
+      const { exportInvoices } = await import('./lib/pdf-export');
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = `${invoice.businessName?.trim() || 'invoice'}-${timestamp}.pdf`;
+      await exportInvoices([invoice], filename);
+    } catch (error) {
+      const errorMsg: ChatMessage = {
+        id: `system-${Date.now()}`,
+        role: 'assistant',
+        content: 'Failed to export this invoice. Please try again.',
+        timestamp: Date.now(),
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+    }
+  };
+
   // Loading component
-  const LoadingScreen = ({ path }: { path?: string }) => (
+  const LoadingScreen = ({ path: _path }: { path?: string }) => (
     <div
       style={{
         display: 'flex',
@@ -312,7 +330,7 @@ export function App() {
   );
 
   // Main invoice app component
-  const InvoiceApp = ({ path }: { path?: string }) => (
+  const InvoiceApp = ({ path: _path }: { path?: string }) => (
     <>
       {/* PDF Export Styles */}
       <style>{`
@@ -325,6 +343,9 @@ export function App() {
           font-family: inherit !important;
         }
       `}</style>
+      
+      {/* Work In Progress Ribbon */}
+      <WorkInProgressRibbon />
       
       {/* Toolbar */}
       <Toolbar
@@ -521,6 +542,34 @@ export function App() {
                     }}
                   >
                     <IconTrash size={16} />
+                  </button>
+
+                  {/* Export single invoice */}
+                  <button
+                    onClick={() => handleExportSingle(invoice)}
+                    style={{
+                      background: '#10b981',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: '32px',
+                      height: '32px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                      transition: 'all 0.2s ease',
+                    }}
+                    title="Export this invoice"
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                    }}
+                  >
+                    <IconDownload size={16} />
                   </button>
                 </div>
         <InvoiceTemplate invoice={invoice} layout={layout} isGenerating={generatingInvoiceId === invoice.id} />

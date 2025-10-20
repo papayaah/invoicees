@@ -65,7 +65,7 @@ export function CompactGridLayout({ invoice, onUpdate, isGenerating = false }: C
             color: '#9f1239',
             marginBottom: '8px',
           }}>INVOICE</div>
-          <div style={{ fontSize: '13px', color: '#881337', fontWeight: '600' }}>
+          <div style={{ fontSize: '16px', color: '#881337', fontWeight: '600' }}>
             {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           </div>
         </div>
@@ -78,15 +78,15 @@ export function CompactGridLayout({ invoice, onUpdate, isGenerating = false }: C
             isLoading={isGenerating}
             styles={{
               label: {
-                fontSize: '10px',
+                fontSize: '12px',
                 fontWeight: '700',
                 letterSpacing: '1px',
                 color: '#5b21b6',
                 marginBottom: '8px',
               },
-              content: { fontSize: '13px', color: '#4c1d95', lineHeight: '1.6' },
+              content: { fontSize: '15px', color: '#4c1d95', lineHeight: '1.6' },
               nameStyle: { fontWeight: '600' },
-              fieldStyle: { fontSize: '11px' },
+              fieldStyle: { fontSize: '14px' },
               addressStyle: {},
             }}
           />
@@ -100,15 +100,15 @@ export function CompactGridLayout({ invoice, onUpdate, isGenerating = false }: C
             isLoading={isGenerating}
             styles={{
               label: {
-                fontSize: '10px',
+                fontSize: '12px',
                 fontWeight: '700',
                 letterSpacing: '1px',
                 color: '#115e59',
                 marginBottom: '8px',
               },
-              content: { fontSize: '13px', color: '#134e4a', lineHeight: '1.6' },
+              content: { fontSize: '15px', color: '#134e4a', lineHeight: '1.6' },
               nameStyle: { fontWeight: '600' },
-              fieldStyle: { fontSize: '11px' },
+              fieldStyle: { fontSize: '14px' },
               addressStyle: {},
             }}
           />
@@ -125,7 +125,7 @@ export function CompactGridLayout({ invoice, onUpdate, isGenerating = false }: C
         <div style={{
           background: '#f5f3ff',
           padding: '15px',
-          fontSize: '12px',
+          fontSize: '15px',
           color: '#5b21b6',
           lineHeight: '1.6',
         }}>
@@ -155,7 +155,7 @@ export function CompactGridLayout({ invoice, onUpdate, isGenerating = false }: C
         <div style={{
           background: '#f0fdfa',
           padding: '15px',
-          fontSize: '12px',
+          fontSize: '15px',
           color: '#115e59',
           lineHeight: '1.6',
         }}>
@@ -193,7 +193,7 @@ export function CompactGridLayout({ invoice, onUpdate, isGenerating = false }: C
             table: {
               width: '100%',
               borderCollapse: 'collapse',
-              fontSize: '13px',
+              fontSize: '15px',
             },
             headerRow: { borderBottom: '2px solid #e5e5e5' },
             headerCell: {
@@ -232,13 +232,13 @@ export function CompactGridLayout({ invoice, onUpdate, isGenerating = false }: C
                 labelText="PAYMENT"
                 styles={{
                   label: {
-                    fontSize: '10px',
+                    fontSize: '12px',
                     fontWeight: '700',
                     letterSpacing: '1px',
                     color: '#9a3412',
                     marginBottom: '8px',
                   },
-                  content: { fontSize: '12px', color: '#7c2d12', lineHeight: '1.6' },
+                  content: { fontSize: '15px', color: '#7c2d12', lineHeight: '1.6' },
                   fieldStyle: {},
                   textareaStyle: { marginTop: '8px' },
                 }}

@@ -39,17 +39,45 @@ export async function exportInvoices(invoices: InvoiceData[], filename: string =
   const doc = printWin.document;
   doc.open();
   doc.write(`<!doctype html><html><head><meta charset="utf-8" /><title>${filename}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     @page { size: A4; margin: 12mm; }
-    body { font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    .page { page-break-after: always; }
-    /* Ensure the cloned invoice fits within printable width */
-    .fit { width: 100%; box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
+    body { 
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: white;
+    }
+    .page { 
+      page-break-after: always;
+      min-height: 297mm;
+      width: 100%;
+      padding: 0;
+    }
+    .page:last-child {
+      page-break-after: avoid;
+    }
+    /* Container for scaled content */
+    .fit { 
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      max-width: 186mm; /* A4 width minus margins */
+      margin: 0 auto;
+    }
+    /* The actual invoice content wrapper */
+    .invoice-wrapper {
+      transform-origin: center center;
+      width: 100%;
+    }
     /* Hide focus/inputs visuals */
+    input, textarea, button { display: none !important; }
     .page * { caret-color: transparent !important; }
   </style>
   </head><body></body></html>`);
-  doc.close();
 
   // Append each invoice clone into its own page section
   const PX_PER_MM = 3.7795275591;
@@ -59,37 +87,63 @@ export async function exportInvoices(invoices: InvoiceData[], filename: string =
     const src = document.getElementById(`invoice-${inv.id}`) as HTMLElement | null;
     const section = doc.createElement('section');
     section.className = 'page';
+    
     if (src) {
+      // Get dimensions from original element in current window
+      const originalRect = src.getBoundingClientRect();
+      
       const cloned = cloneWithStyles(src);
-      cloned.classList.add('fit');
-      section.appendChild(cloned);
-      doc.body.appendChild(section);
-
-      // Compact scaling: shrink invoices with small item counts, and ensure one-page fit
-      const desiredBaseScale = inv.items.length <= 10 ? 0.9 : 1;
-      const contentRect = cloned.getBoundingClientRect();
+      
+      // Create wrapper for proper centering
+      const wrapper = doc.createElement('div');
+      wrapper.className = 'fit';
+      
+      const invoiceWrapper = doc.createElement('div');
+      invoiceWrapper.className = 'invoice-wrapper';
+      invoiceWrapper.appendChild(cloned);
+      
+      // Calculate scale based on original dimensions
+      const desiredBaseScale = inv.items.length <= 10 ? 0.75 : 0.85;
       let scale = desiredBaseScale;
-      if (contentRect.height * scale > printableHeightPx) {
-        scale = Math.min(scale, (printableHeightPx - 8) / contentRect.height);
+      
+      if (originalRect.height * scale > printableHeightPx) {
+        scale = Math.min(scale, (printableHeightPx - 20) / originalRect.height);
       }
-      if (scale < 1) {
-        cloned.style.transformOrigin = 'top left';
-        cloned.style.transform = `scale(${scale})`;
-        cloned.style.width = `calc(100% / ${scale})`;
-      }
-      continue;
+      
+      // Apply scaling
+      invoiceWrapper.style.transform = `scale(${scale})`;
+      invoiceWrapper.style.transformOrigin = 'center center';
+      
+      wrapper.appendChild(invoiceWrapper);
+      section.appendChild(wrapper);
+      doc.body.appendChild(section);
     } else {
       // Fallback text if not found
       const div = doc.createElement('div');
       div.textContent = 'Invoice content not found';
+      div.style.textAlign = 'center';
       section.appendChild(div);
+      doc.body.appendChild(section);
     }
-    doc.body.appendChild(section);
   }
 
-  // Print
-  printWin.addEventListener('load', () => setTimeout(() => printWin.print(), 50));
-  printWin.onafterprint = () => printWin.close();
+  // Close document to finalize content
+  doc.close();
+
+  // Wait a bit for rendering, then print
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  // Close window after print dialog is closed (whether printed or cancelled)
+  printWin.onafterprint = () => {
+    printWin.close();
+  };
+  
+  // Also close if user closes the window directly
+  printWin.onbeforeunload = () => {
+    printWin.close();
+  };
+  
+  printWin.print();
 
   track('pdf_export', { filename, count: invoices.length, engine: 'print-clone', timestamp: new Date().toISOString() });
 }

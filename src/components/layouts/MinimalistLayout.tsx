@@ -36,13 +36,13 @@ export function MinimalistLayout({ invoice, onUpdate, isGenerating = false }: Mi
       {/* Header */}
       <div style={{ marginBottom: '20px' }}>
         <h1 style={{
-          fontSize: '20px',
+          fontSize: '32px',
           fontWeight: '300',
           margin: 0,
           marginBottom: '6px',
           color: '#1a202c',
         }}>INVOICE</h1>
-        <div style={{ fontSize: '10px', color: '#718096' }}>
+        <div style={{ fontSize: '14px', color: '#718096' }}>
           {new Date().toLocaleDateString('en-US', { 
             year: 'numeric', 
             month: 'long', 
@@ -65,14 +65,14 @@ export function MinimalistLayout({ invoice, onUpdate, isGenerating = false }: Mi
           isLoading={isGenerating}
           styles={{
             label: {
-              fontSize: '11px',
+              fontSize: '13px',
               fontWeight: '600',
               letterSpacing: '1px',
               color: '#a0aec0',
               marginBottom: '12px',
             },
             content: {
-              fontSize: '11px',
+              fontSize: '14px',
               lineHeight: '1.8',
             },
             nameStyle: {
@@ -94,14 +94,14 @@ export function MinimalistLayout({ invoice, onUpdate, isGenerating = false }: Mi
           isLoading={isGenerating}
           styles={{
             label: {
-              fontSize: '11px',
+              fontSize: '13px',
               fontWeight: '600',
               letterSpacing: '1px',
               color: '#a0aec0',
               marginBottom: '12px',
             },
             content: {
-              fontSize: '11px',
+              fontSize: '14px',
               lineHeight: '1.8',
             },
             nameStyle: {
@@ -127,22 +127,22 @@ export function MinimalistLayout({ invoice, onUpdate, isGenerating = false }: Mi
           table: {
             width: '100%',
             borderCollapse: 'collapse',
-            fontSize: '14px',
+            fontSize: '15px',
           },
           headerRow: { borderBottom: '2px solid #e2e8f0' },
           headerCell: {
             textAlign: 'left',
             padding: '12px 0',
             fontWeight: '600',
-            fontSize: '11px',
+            fontSize: '13px',
             letterSpacing: '1px',
             color: '#a0aec0',
           },
           bodyRow: { borderBottom: '1px solid #f7fafc' },
-          descriptionCell: { padding: '16px 0', color: '#2d3748' },
-          quantityCell: { textAlign: 'right', padding: '16px 0', color: '#718096' },
-          priceCell: { textAlign: 'right', padding: '16px 0', color: '#718096' },
-          totalCell: { textAlign: 'right', padding: '16px 0', color: '#2d3748', fontWeight: '500' },
+          descriptionCell: { padding: '16px 0', color: '#2d3748', fontSize: '15px' },
+          quantityCell: { textAlign: 'right', padding: '16px 0', color: '#718096', fontSize: '15px' },
+          priceCell: { textAlign: 'right', padding: '16px 0', color: '#718096', fontSize: '15px' },
+          totalCell: { textAlign: 'right', padding: '16px 0', color: '#2d3748', fontWeight: '500', fontSize: '15px' },
         }}
       />
 
@@ -160,7 +160,7 @@ export function MinimalistLayout({ invoice, onUpdate, isGenerating = false }: Mi
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
-            fontSize: '14px',
+            fontSize: '18px',
             fontWeight: '600',
             color: '#1a202c',
           }}>
@@ -180,7 +180,7 @@ export function MinimalistLayout({ invoice, onUpdate, isGenerating = false }: Mi
           styles={{
             container: { marginBottom: '15px' },
             label: {
-              fontSize: '11px',
+              fontSize: '13px',
               fontWeight: '600',
               letterSpacing: '1px',
               color: '#a0aec0',

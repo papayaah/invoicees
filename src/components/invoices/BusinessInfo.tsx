@@ -1,6 +1,6 @@
 import { InvoiceData } from '@/types/invoice';
 import { SkeletonLoader } from './SkeletonLoader';
-import { commonStyles, mergeStyles } from './commonStyles';
+import { commonStyles } from './commonStyles';
 
 interface BusinessInfoProps {
   invoice: InvoiceData;
@@ -18,8 +18,6 @@ interface BusinessInfoProps {
 }
 
 export function BusinessInfo({ invoice, onUpdate, styles = {}, inputHoverColor = 'rgba(0, 0, 0, 0.02)', isLoading = false }: BusinessInfoProps) {
-  const mergedStyles = mergeStyles(commonStyles, styles);
-  
   const inputStyle: React.CSSProperties = {
     ...commonStyles.input,
   };

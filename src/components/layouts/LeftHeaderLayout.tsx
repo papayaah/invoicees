@@ -41,7 +41,7 @@ export function LeftHeaderLayout({ invoice, onUpdate, isGenerating = false }: Le
         overflowWrap: 'break-word',
       }}>
         <h1 style={{
-          fontSize: '28px',
+          fontSize: '36px',
           fontWeight: '700',
           margin: '0 0 40px 0',
           color: '#3730a3',
@@ -55,19 +55,19 @@ export function LeftHeaderLayout({ invoice, onUpdate, isGenerating = false }: Le
           styles={{
             container: { marginBottom: '40px' },
             label: {
-              fontSize: '10px',
+              fontSize: '12px',
               fontWeight: '700',
               letterSpacing: '1.5px',
               color: '#6366f1',
               marginBottom: '12px',
             },
             content: {
-              fontSize: '13px',
+              fontSize: '15px',
               lineHeight: '1.8',
             },
             nameStyle: { fontWeight: '600' },
             fieldStyle: {},
-            addressStyle: { marginTop: '8px', fontSize: '12px', opacity: 0.8 },
+            addressStyle: { marginTop: '8px', fontSize: '14px', opacity: 0.8 },
           }}
         />
 
@@ -81,15 +81,15 @@ export function LeftHeaderLayout({ invoice, onUpdate, isGenerating = false }: Le
             labelText="PAYMENT"
             styles={{
               label: {
-                fontSize: '10px',
+                fontSize: '12px',
                 fontWeight: '700',
                 letterSpacing: '1.5px',
                 color: '#6366f1',
                 marginBottom: '12px',
               },
               content: {
-                fontSize: '12px',
-                lineHeight: '1.8',
+              fontSize: '15px',
+              lineHeight: '1.8',
               },
               fieldStyle: {},
               textareaStyle: { marginTop: '8px' },
@@ -118,7 +118,7 @@ export function LeftHeaderLayout({ invoice, onUpdate, isGenerating = false }: Le
             labelText="BILL TO"
             styles={{
               label: {
-                fontSize: '10px',
+                fontSize: '12px',
                 fontWeight: '700',
                 letterSpacing: '1.5px',
                 color: '#94a3b8',
@@ -136,7 +136,7 @@ export function LeftHeaderLayout({ invoice, onUpdate, isGenerating = false }: Le
           />
 
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '13px', color: '#64748b' }}>
+            <div style={{ fontSize: '15px', color: '#64748b' }}>
               {new Date().toLocaleDateString('en-US')}
             </div>
           </div>
@@ -153,7 +153,7 @@ export function LeftHeaderLayout({ invoice, onUpdate, isGenerating = false }: Le
             table: {
               width: '100%',
               borderCollapse: 'collapse',
-              fontSize: '14px',
+              fontSize: '15px',
               minWidth: '500px',
             },
             headerRow: { background: '#f1f5f9' },
@@ -161,7 +161,7 @@ export function LeftHeaderLayout({ invoice, onUpdate, isGenerating = false }: Le
               textAlign: 'left',
               padding: '14px 16px',
               fontWeight: '700',
-              fontSize: '10px',
+              fontSize: '12px',
               letterSpacing: '1.5px',
               color: '#475569',
             },
@@ -186,7 +186,7 @@ export function LeftHeaderLayout({ invoice, onUpdate, isGenerating = false }: Le
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
-              fontSize: '20px',
+              fontSize: '22px',
               fontWeight: '700',
             }}>
               <span>TOTAL</span>
@@ -200,13 +200,13 @@ export function LeftHeaderLayout({ invoice, onUpdate, isGenerating = false }: Le
           styles={{
             container: { marginTop: '40px' },
             label: { 
-              fontSize: '10px',
+              fontSize: '12px',
               fontWeight: '700',
               letterSpacing: '1.5px',
               color: '#94a3b8',
             },
             content: { 
-              fontSize: '13px', 
+              fontSize: '15px', 
               color: '#64748b' 
             },
           }}
