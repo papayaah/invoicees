@@ -1,11 +1,28 @@
 import { InvoiceData } from '@/types/invoice';
 import { calculateTotal, formatCurrency } from '@/lib/ai-agent';
+import { hasPaymentDetails } from '@/lib/utils';
+import { BusinessInfo } from '@/components/invoices/BusinessInfo';
+import { ClientInfo } from '@/components/invoices/ClientInfo';
+import { PaymentDetails } from '@/components/invoices/PaymentDetails';
+import { InvoiceItemsTable } from '@/components/invoices/InvoiceItemsTable';
+import { Notes } from '@/components/invoices/Notes';
 
 interface LeftHeaderLayoutProps {
   invoice: InvoiceData;
+  onUpdate?: (id: string, updates: Partial<InvoiceData>) => void;
+  isGenerating?: boolean;
 }
 
-export function LeftHeaderLayout({ invoice }: LeftHeaderLayoutProps) {
+export function LeftHeaderLayout({ invoice, onUpdate, isGenerating = false }: LeftHeaderLayoutProps) {
+  const handleUpdate = (field: keyof InvoiceData, value: string) => {
+    if (onUpdate && invoice.id) {
+      onUpdate(invoice.id, { [field]: value });
+    }
+  };
+
+  // Check if payment details have any content
+  const hasPaymentDetailsContent = hasPaymentDetails(invoice);
+
   const total = calculateTotal(invoice.items);
 
   return (
@@ -30,50 +47,54 @@ export function LeftHeaderLayout({ invoice }: LeftHeaderLayoutProps) {
           color: '#3730a3',
         }}>INVOICE</h1>
 
-        <div style={{ marginBottom: '40px' }}>
-          <div style={{
-            fontSize: '10px',
-            fontWeight: '700',
-            letterSpacing: '1.5px',
-            color: '#6366f1',
-            marginBottom: '12px',
-          }}>FROM</div>
-          <div style={{ fontSize: '13px', lineHeight: '1.8' }}>
-            {invoice.businessName && (
-              <div style={{ fontWeight: '600' }}>
-                {invoice.businessName}
-              </div>
-            )}
-            {invoice.businessEmail && <div>{invoice.businessEmail}</div>}
-            {invoice.businessPhone && <div>{invoice.businessPhone}</div>}
-            {invoice.businessAddress && (
-              <div style={{ marginTop: '8px', fontSize: '12px', opacity: 0.8 }}>
-                {invoice.businessAddress}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {(invoice.bankName || invoice.bankAccountNumber || invoice.paymentInstructions) && (
-          <div>
-            <div style={{
+        <BusinessInfo
+          invoice={invoice}
+          onUpdate={handleUpdate}
+          inputHoverColor="rgba(255, 255, 255, 0.15)"
+          isLoading={isGenerating}
+          styles={{
+            container: { marginBottom: '40px' },
+            label: {
               fontSize: '10px',
               fontWeight: '700',
               letterSpacing: '1.5px',
               color: '#6366f1',
               marginBottom: '12px',
-            }}>PAYMENT</div>
-            <div style={{ fontSize: '12px', lineHeight: '1.8' }}>
-              {invoice.bankName && <div>{invoice.bankName}</div>}
-              {invoice.bankAccountNumber && <div>{invoice.bankAccountNumber}</div>}
-              {invoice.bankAccountType && <div>{invoice.bankAccountType}</div>}
-              {invoice.paymentInstructions && (
-                <div style={{ marginTop: invoice.bankName || invoice.bankAccountNumber ? '8px' : '0', whiteSpace: 'pre-line' }}>
-                  {invoice.paymentInstructions}
-                </div>
-              )}
-            </div>
-          </div>
+            },
+            content: {
+              fontSize: '13px',
+              lineHeight: '1.8',
+            },
+            nameStyle: { fontWeight: '600' },
+            fieldStyle: {},
+            addressStyle: { marginTop: '8px', fontSize: '12px', opacity: 0.8 },
+          }}
+        />
+
+        {hasPaymentDetailsContent && (
+          <PaymentDetails
+            invoice={invoice}
+            onUpdate={handleUpdate}
+            inputHoverColor="rgba(255, 255, 255, 0.15)"
+            isLoading={isGenerating}
+            compact={true}
+            labelText="PAYMENT"
+            styles={{
+              label: {
+                fontSize: '10px',
+                fontWeight: '700',
+                letterSpacing: '1.5px',
+                color: '#6366f1',
+                marginBottom: '12px',
+              },
+              content: {
+                fontSize: '12px',
+                lineHeight: '1.8',
+              },
+              fieldStyle: {},
+              textareaStyle: { marginTop: '8px' },
+            }}
+          />
         )}
       </div>
 
@@ -89,29 +110,30 @@ export function LeftHeaderLayout({ invoice }: LeftHeaderLayoutProps) {
           alignItems: 'flex-start',
           marginBottom: '50px',
         }}>
-          <div>
-            <div style={{
-              fontSize: '10px',
-              fontWeight: '700',
-              letterSpacing: '1.5px',
-              color: '#94a3b8',
-              marginBottom: '12px',
-            }}>BILL TO</div>
-            <div style={{ fontSize: '15px', lineHeight: '1.8', color: '#1e293b' }}>
-              {invoice.clientName && (
-                <div style={{ fontWeight: '600' }}>
-                  {invoice.clientName}
-                </div>
-              )}
-              {invoice.clientEmail && <div>{invoice.clientEmail}</div>}
-              {invoice.clientPhone && <div>{invoice.clientPhone}</div>}
-              {invoice.clientAddress && (
-                <div style={{ marginTop: '8px', color: '#64748b' }}>
-                  {invoice.clientAddress}
-                </div>
-              )}
-            </div>
-          </div>
+          <ClientInfo
+            invoice={invoice}
+            onUpdate={handleUpdate}
+            inputHoverColor="rgba(0, 0, 0, 0.02)"
+            isLoading={isGenerating}
+            labelText="BILL TO"
+            styles={{
+              label: {
+                fontSize: '10px',
+                fontWeight: '700',
+                letterSpacing: '1.5px',
+                color: '#94a3b8',
+                marginBottom: '12px',
+              },
+              content: {
+                fontSize: '15px',
+                lineHeight: '1.8',
+                color: '#1e293b',
+              },
+              nameStyle: { fontWeight: '600' },
+              fieldStyle: {},
+              addressStyle: { marginTop: '8px', color: '#64748b' },
+            }}
+          />
 
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '13px', color: '#64748b' }}>
@@ -120,78 +142,36 @@ export function LeftHeaderLayout({ invoice }: LeftHeaderLayoutProps) {
           </div>
         </div>
 
-        <div style={{ 
-          overflowX: 'auto',
-          marginBottom: '30px',
-        }}>
-        <table style={{
-          width: '100%',
-          borderCollapse: 'collapse',
-          fontSize: '14px',
-          minWidth: '500px',
-        }}>
-          <thead>
-            <tr style={{ background: '#f1f5f9' }}>
-              <th style={{
-                textAlign: 'left',
-                padding: '14px 16px',
-                fontWeight: '700',
-                fontSize: '10px',
-                letterSpacing: '1.5px',
-                color: '#475569',
-              }}>DESCRIPTION</th>
-              <th style={{
-                textAlign: 'center',
-                padding: '14px 16px',
-                fontWeight: '700',
-                fontSize: '10px',
-                letterSpacing: '1.5px',
-                color: '#475569',
-              }}>QTY</th>
-              <th style={{
-                textAlign: 'right',
-                padding: '14px 16px',
-                fontWeight: '700',
-                fontSize: '10px',
-                letterSpacing: '1.5px',
-                color: '#475569',
-              }}>PRICE</th>
-              <th style={{
-                textAlign: 'right',
-                padding: '14px 16px',
-                fontWeight: '700',
-                fontSize: '10px',
-                letterSpacing: '1.5px',
-                color: '#475569',
-              }}>TOTAL</th>
-            </tr>
-          </thead>
-          <tbody>
-            {invoice.items.map((item, index) => {
-              const quantity = item.quantity || 0;
-              const unitPrice = item.unitPrice || 0;
-              const total = quantity * unitPrice;
-              
-              return (
-                <tr key={index} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                  <td style={{ padding: '16px', color: '#1e293b' }}>
-                    {item.description}
-                  </td>
-                  <td style={{ textAlign: 'center', padding: '16px', color: '#64748b' }}>
-                    {quantity}
-                  </td>
-                  <td style={{ textAlign: 'right', padding: '16px', color: '#64748b' }}>
-                    ${formatCurrency(unitPrice)}
-                  </td>
-                  <td style={{ textAlign: 'right', padding: '16px', color: '#1e293b', fontWeight: '600' }}>
-                    ${formatCurrency(total)}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        </div>
+        <InvoiceItemsTable
+          items={invoice.items}
+          isLoading={isGenerating}
+          styles={{
+            container: { 
+              overflowX: 'auto',
+              marginBottom: '30px',
+            },
+            table: {
+              width: '100%',
+              borderCollapse: 'collapse',
+              fontSize: '14px',
+              minWidth: '500px',
+            },
+            headerRow: { background: '#f1f5f9' },
+            headerCell: {
+              textAlign: 'left',
+              padding: '14px 16px',
+              fontWeight: '700',
+              fontSize: '10px',
+              letterSpacing: '1.5px',
+              color: '#475569',
+            },
+            bodyRow: { borderBottom: '1px solid #f1f5f9' },
+            descriptionCell: { padding: '16px', color: '#1e293b' },
+            quantityCell: { textAlign: 'center', padding: '16px', color: '#64748b' },
+            priceCell: { textAlign: 'right', padding: '16px', color: '#64748b' },
+            totalCell: { textAlign: 'right', padding: '16px', color: '#1e293b', fontWeight: '600' },
+          }}
+        />
 
         <div style={{
           display: 'flex',
@@ -215,20 +195,22 @@ export function LeftHeaderLayout({ invoice }: LeftHeaderLayoutProps) {
           </div>
         </div>
 
-        {invoice.notes && (
-          <div style={{ marginTop: '40px' }}>
-            <div style={{
+        <Notes 
+          invoice={invoice}
+          styles={{
+            container: { marginTop: '40px' },
+            label: { 
               fontSize: '10px',
               fontWeight: '700',
               letterSpacing: '1.5px',
               color: '#94a3b8',
-              marginBottom: '12px',
-            }}>NOTES</div>
-            <div style={{ fontSize: '13px', lineHeight: '1.8', color: '#64748b' }}>
-              {invoice.notes}
-            </div>
-          </div>
-        )}
+            },
+            content: { 
+              fontSize: '13px', 
+              color: '#64748b' 
+            },
+          }}
+        />
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 {
-  "name": "chatnano",
+  "name": "invoicees",
   "version": "1.0.0",
-  "description": "A simple chat AI conversation app using Preact and Mantine with Chrome's built-in AI",
+  "description": "Invoicees - AI-powered invoice generator using Preact and Chrome's built-in AI",
   "private": true,
   "scripts": {
     "dev": "vite",
@@ -12,9 +12,11 @@
   },
   "dependencies": {
     "@mantine/core": "^7.12.2",
+    "@mantine/dates": "^7.12.2",
     "@mantine/hooks": "^7.12.2",
     "@tabler/icons-react": "^3.14.0",
     "@vercel/analytics": "^1.5.0",
+    "dayjs": "^1.11.10",
     "dexie": "^4.2.1",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
@@ -37,11 +39,12 @@
     "vite": "^5.4.2"
   },
   "keywords": [
-    "chat",
+    "invoice",
+    "invoicing",
     "ai",
     "preact",
-    "mantine",
-    "chrome-ai"
+    "chrome-ai",
+    "invoice-generator"
   ],
   "author": "",
   "license": "MIT"

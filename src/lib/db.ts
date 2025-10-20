@@ -1,4 +1,5 @@
 import Dexie, { Table } from 'dexie';
+import { InvoiceData } from '@/types/invoice';
 
 export interface DocumentationEntry {
   id?: number;
@@ -8,13 +9,23 @@ export interface DocumentationEntry {
   createdAt: number;
 }
 
+export interface SavedInvoice extends InvoiceData {
+  savedAt: number;
+}
+
 export class InvoiceesDB extends Dexie {
   documentation!: Table<DocumentationEntry>;
+  invoices!: Table<SavedInvoice>;
 
   constructor() {
     super('InvoiceesDB');
     this.version(1).stores({
       documentation: '++id, topic, *keywords, createdAt',
+    });
+    // Version 2: Add invoices table
+    this.version(2).stores({
+      documentation: '++id, topic, *keywords, createdAt',
+      invoices: 'id, savedAt, businessName, clientName',
     });
   }
 }
@@ -149,5 +160,37 @@ export async function searchDocumentation(query: string): Promise<DocumentationE
     .toArray();
 
   return results;
+}
+
+/**
+ * Save an invoice to IndexedDB
+ */
+export async function saveInvoice(invoice: InvoiceData): Promise<void> {
+  const savedInvoice: SavedInvoice = {
+    ...invoice,
+    savedAt: Date.now(),
+  };
+  await db.invoices.put(savedInvoice);
+}
+
+/**
+ * Get all saved invoices
+ */
+export async function getAllSavedInvoices(): Promise<SavedInvoice[]> {
+  return await db.invoices.orderBy('savedAt').reverse().toArray();
+}
+
+/**
+ * Delete a saved invoice
+ */
+export async function deleteSavedInvoice(id: string): Promise<void> {
+  await db.invoices.delete(id);
+}
+
+/**
+ * Get a single invoice by ID
+ */
+export async function getSavedInvoice(id: string): Promise<SavedInvoice | undefined> {
+  return await db.invoices.get(id);
 }
 

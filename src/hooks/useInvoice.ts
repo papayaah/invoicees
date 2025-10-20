@@ -1,8 +1,12 @@
-import { useState } from 'preact/hooks';
+import { useState, useEffect } from 'preact/hooks';
 import { InvoiceData, InvoiceLayout } from '@/types/invoice';
+import { saveInvoice, getAllSavedInvoices, deleteSavedInvoice } from '@/lib/db';
 
 const createEmptyInvoice = (): InvoiceData => ({
   id: `invoice-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+  invoiceDate: new Date().toISOString(),
+  dueDate: undefined,
+  invoiceNumber: undefined,
   businessName: '',
   businessEmail: '',
   businessAddress: '',
@@ -23,10 +27,31 @@ const createEmptyInvoice = (): InvoiceData => ({
 export function useInvoice() {
   const [invoices, setInvoices] = useState<InvoiceData[]>([]);
   const [layout, setLayout] = useState<InvoiceLayout>('minimalist');
+  const [isLoading, setIsLoading] = useState(true);
+  const [savedInvoiceIds, setSavedInvoiceIds] = useState<Set<string>>(new Set());
+
+  // Load saved invoices on mount
+  useEffect(() => {
+    const loadSavedInvoices = async () => {
+      try {
+        const savedInvoices = await getAllSavedInvoices();
+        // Saved invoices are already ordered newest first by the database query
+        setInvoices(savedInvoices);
+        // Mark all loaded invoices as saved
+        setSavedInvoiceIds(new Set(savedInvoices.map(inv => inv.id!)));
+      } catch (error) {
+        console.error('Failed to load saved invoices:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadSavedInvoices();
+  }, []);
 
   const addNewInvoice = () => {
     const newInvoice = createEmptyInvoice();
-    setInvoices((prev) => [...prev, newInvoice]);
+    setInvoices((prev) => [newInvoice, ...prev]); // Add to beginning of array
     return newInvoice;
   };
 
@@ -54,6 +79,40 @@ export function useInvoice() {
     );
   };
 
+  const loadInvoice = (invoice: InvoiceData) => {
+    setInvoices((prev) => [invoice, ...prev]); // Add to beginning of array
+  };
+
+  // Manual save to IndexedDB
+  const saveInvoiceToDB = async (id: string) => {
+    const invoice = invoices.find(inv => inv.id === id);
+    if (!invoice) return;
+
+    try {
+      await saveInvoice(invoice);
+      setSavedInvoiceIds(prev => new Set([...prev, id]));
+    } catch (error) {
+      console.error('Failed to save invoice:', error);
+    }
+  };
+
+  // Remove from IndexedDB (unsave)
+  const unsaveInvoice = async (id: string) => {
+    try {
+      await deleteSavedInvoice(id);
+      setSavedInvoiceIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+    } catch (error) {
+      console.error('Failed to unsave invoice:', error);
+    }
+  };
+
+  // Check if invoice is saved
+  const isInvoiceSaved = (id: string) => savedInvoiceIds.has(id);
+
   return {
     invoices,
     layout,
@@ -63,6 +122,11 @@ export function useInvoice() {
     deleteInvoice,
     resetAllInvoices,
     removeItem,
+    loadInvoice,
+    saveInvoiceToDB,
+    unsaveInvoice,
+    isInvoiceSaved,
+    isLoading,
   };
 }
 

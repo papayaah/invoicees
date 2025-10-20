@@ -3,6 +3,7 @@ import Router, { route } from 'preact-router';
 import { InvoiceTemplate } from './components/InvoiceTemplate';
 import { FloatingChat } from './components/FloatingChat';
 import { Toolbar } from './components/Toolbar';
+import { IconDownload, IconTrash, IconBookmark, IconBookmarkOff } from '@tabler/icons-react';
 import { DemoSimulation } from './components/DemoSimulation';
 import { useInvoice } from './hooks/useInvoice';
 import { ChatMessage } from './types/invoice';
@@ -22,9 +23,10 @@ import { initializeDocumentation } from './lib/db';
 import { track } from '@vercel/analytics';
 
 export function App() {
-  const { invoices, layout, setLayout, addNewInvoice, updateInvoice, resetAllInvoices, deleteInvoice } = useInvoice();
+  const { invoices, layout, setLayout, addNewInvoice, updateInvoice, resetAllInvoices, deleteInvoice, saveInvoiceToDB, unsaveInvoice, isInvoiceSaved } = useInvoice();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [generatingInvoiceId, setGeneratingInvoiceId] = useState<string | null>(null);
   const [aiAvailable, setAiAvailable] = useState<boolean | null>(null);
   const [sessionInitialized, setSessionInitialized] = useState(false);
   const [examplePromptToType, setExamplePromptToType] = useState<string | null>(null);
@@ -133,6 +135,7 @@ export function App() {
 
     // Create a new invoice for each prompt
     const newInvoice = addNewInvoice();
+    setGeneratingInvoiceId(newInvoice.id);
 
     try {
       let session = getGlobalSession();
@@ -183,6 +186,10 @@ export function App() {
           setLayout('compactGrid');
         }
       }
+
+      // Clear skeleton animation only after successful processing
+      setIsProcessing(false);
+      setGeneratingInvoiceId(null);
     } catch (error) {
       console.error('Message processing error:', error);
       
@@ -210,6 +217,9 @@ export function App() {
         } catch (recreateError) {
           setAiAvailable(false);
         }
+        // Clear skeleton on error
+        setIsProcessing(false);
+        setGeneratingInvoiceId(null);
       } else if (error instanceof Error && error.message.includes('AI model not available')) {
         setAiAvailable(false);
       } else {
@@ -222,8 +232,13 @@ export function App() {
         };
         setMessages((prev) => [...prev, errorMsg]);
       }
-    } finally {
+      
+      // Clear skeleton on error
       setIsProcessing(false);
+      setGeneratingInvoiceId(null);
+    } finally {
+      // Only clear processing state if not already cleared in success path
+      // (This handles error cases where skeleton should still be cleared)
     }
   };
 
@@ -240,19 +255,11 @@ export function App() {
     }
 
     try {
-      // Import the export function
-      const { exportMultipleInvoicesToPDF } = await import('./lib/pdf-export');
-      
-      // Get all invoice IDs
-      const invoiceIds = invoices.map(inv => `invoice-${inv.id}`);
-      
-      // Generate filename
+      // Use our own print-to-PDF export (no external PDF libs)
+      const { exportInvoices } = await import('./lib/pdf-export');
       const timestamp = new Date().toISOString().split('T')[0];
-      const filename = invoices.length === 1 
-        ? `invoice-${timestamp}.pdf`
-        : `invoices-${timestamp}.pdf`;
-      
-      await exportMultipleInvoicesToPDF(invoiceIds, filename);
+      const filename = invoices.length === 1 ? `invoice-${timestamp}.pdf` : `invoices-${timestamp}.pdf`;
+      await exportInvoices(invoices, filename);
       
       const successMsg: ChatMessage = {
         id: `system-${Date.now()}`,
@@ -307,6 +314,18 @@ export function App() {
   // Main invoice app component
   const InvoiceApp = ({ path }: { path?: string }) => (
     <>
+      {/* PDF Export Styles */}
+      <style>{`
+        .pdf-export {
+          font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+        .pdf-export * {
+          font-family: inherit !important;
+        }
+      `}</style>
+      
       {/* Toolbar */}
       <Toolbar
         currentLayout={layout}
@@ -439,34 +458,166 @@ export function App() {
           }}>
             {invoices.map((invoice) => (
               <div key={invoice.id} style={{ position: 'relative' }}>
-                <button
-                  onClick={() => deleteInvoice(invoice.id!)}
-                  style={{
-                    position: 'absolute',
-                    top: '10px',
-                    right: '10px',
-                    background: '#ef4444',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '50%',
-                    width: '32px',
-                    height: '32px',
-                    cursor: 'pointer',
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                    zIndex: 10,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-                  }}
-                  title="Delete invoice"
-                >
-                  ×
-                </button>
-        <InvoiceTemplate invoice={invoice} layout={layout} />
+                {/* Action buttons */}
+                <div style={{
+                  position: 'absolute',
+                  top: '10px',
+                  right: '10px',
+                  display: 'flex',
+                  gap: '8px',
+                  zIndex: 10,
+                }}>
+                  {/* Save/Unsave button */}
+                  <button
+                    onClick={() => isInvoiceSaved(invoice.id!) ? unsaveInvoice(invoice.id!) : saveInvoiceToDB(invoice.id!)}
+                    style={{
+                      background: isInvoiceSaved(invoice.id!) ? '#10b981' : '#6b7280',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: '32px',
+                      height: '32px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                      transition: 'all 0.2s ease',
+                    }}
+                    title={isInvoiceSaved(invoice.id!) ? "Unsave invoice" : "Save invoice"}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                    }}
+                  >
+                    {isInvoiceSaved(invoice.id!) ? <IconBookmark size={16} /> : <IconBookmarkOff size={16} />}
+                  </button>
+
+                  {/* Delete button */}
+                  <button
+                    onClick={() => deleteInvoice(invoice.id!)}
+                    style={{
+                      background: '#ef4444',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: '32px',
+                      height: '32px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                      transition: 'all 0.2s ease',
+                    }}
+                    title="Delete invoice"
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                    }}
+                  >
+                    <IconTrash size={16} />
+                  </button>
+                </div>
+        <InvoiceTemplate invoice={invoice} layout={layout} isGenerating={generatingInvoiceId === invoice.id} />
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Saved Invoices Section */}
+        {invoices.filter(inv => isInvoiceSaved(inv.id!)).length > 0 && (
+          <div style={{
+            marginTop: '40px',
+            padding: '20px',
+            background: '#f8fafc',
+            borderRadius: '12px',
+            border: '1px solid #e2e8f0',
+          }}>
+            <h3 style={{
+              margin: '0 0 20px 0',
+              fontSize: '18px',
+              fontWeight: '600',
+              color: '#1e293b',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}>
+              <IconBookmark size={20} />
+              Saved Invoices ({invoices.filter(inv => isInvoiceSaved(inv.id!)).length})
+            </h3>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: '20px',
+            }}>
+              {invoices.filter(inv => isInvoiceSaved(inv.id!)).map((invoice) => (
+                <div key={`saved-${invoice.id}`} style={{
+                  background: 'white',
+                  padding: '16px',
+                  borderRadius: '8px',
+                  border: '1px solid #e2e8f0',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '12px',
+                  }}>
+                    <h4 style={{
+                      margin: 0,
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#1e293b',
+                    }}>
+                      {invoice.businessName || 'Untitled Invoice'}
+                    </h4>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        onClick={() => unsaveInvoice(invoice.id!)}
+                        style={{
+                          background: '#ef4444',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          padding: '4px 8px',
+                          fontSize: '12px',
+                          cursor: 'pointer',
+                        }}
+                        title="Unsave"
+                      >
+                        <IconBookmarkOff size={14} />
+                      </button>
+                      <button
+                        onClick={() => deleteInvoice(invoice.id!)}
+                        style={{
+                          background: '#6b7280',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          padding: '4px 8px',
+                          fontSize: '12px',
+                          cursor: 'pointer',
+                        }}
+                        title="Delete"
+                      >
+                        <IconTrash size={14} />
+                      </button>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#64748b' }}>
+                    <div>Client: {invoice.clientName || 'Not specified'}</div>
+                    <div>Items: {invoice.items.length}</div>
+                    <div>Total: ${invoice.items.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0).toFixed(2)}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

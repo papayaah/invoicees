@@ -6,6 +6,9 @@ export interface InvoiceItem {
 
 export interface InvoiceData {
   id?: string;
+  invoiceDate?: string; // ISO date string
+  dueDate?: string; // ISO date string
+  invoiceNumber?: string;
   businessName: string;
   businessEmail: string;
   businessAddress: string;
@@ -18,7 +21,7 @@ export interface InvoiceData {
   bankAccountNumber: string;
   bankAccountType: string;
   bankBranch: string;
-  paymentInstructions: string; // For custom payment methods like crypto wallets
+  paymentInstructions?: string; // For custom payment methods like crypto wallets
   items: InvoiceItem[];
   notes: string;
 }

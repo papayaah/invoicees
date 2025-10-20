@@ -95,7 +95,7 @@ Start chatting with the AI to build your invoice:
 ## Project Structure
 
 ```
-invoicegenius3/
+invoicees/
 ├── src/
 │   ├── components/
 │   │   ├── layouts/          # Invoice templates

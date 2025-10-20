@@ -231,20 +231,15 @@ export function Toolbar({ currentLayout, onLayoutChange, onExportPDF, onReset }:
             gap: '8px',
           }}
         >
-          <div style={{
-            width: '24px',
-            height: '24px',
-            background: 'rgba(255, 255, 255, 0.2)',
-        display: 'flex',
-        alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
-            fontWeight: '700',
-            fontSize: '12px',
-            borderRadius: '50%',
-          }}>
-            IV
-          </div>
+          <img 
+            src="/logo.png" 
+            alt="Invoicees" 
+            style={{
+              width: '16px',
+              borderRadius: '4px',
+              objectFit: 'cover',
+            }}
+          />
           <div style={{ fontWeight: '600', fontSize: '13px', color: 'white' }}>
             Invoicees
           </div>
@@ -279,20 +274,15 @@ export function Toolbar({ currentLayout, onLayoutChange, onExportPDF, onReset }:
         borderBottom: '2px solid #e5e7eb',
       }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <div style={{
-          width: '32px',
-          height: '32px',
-          background: '#a855f7',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          fontWeight: '700',
-            fontSize: '14px',
+        <img 
+          src="/logo.png" 
+          alt="Invoicees" 
+          style={{
+            width: '16px',
             borderRadius: '6px',
-        }}>
-            IV
-        </div>
+            objectFit: 'cover',
+          }}
+        />
         <div>
             <div style={{ fontWeight: '700', fontSize: '14px', color: '#1f2937' }}>
               Invoicees

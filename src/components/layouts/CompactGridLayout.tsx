@@ -1,12 +1,44 @@
 import { InvoiceData } from '@/types/invoice';
 import { calculateTotal, formatCurrency } from '@/lib/ai-agent';
+import { hasPaymentDetails } from '@/lib/utils';
+import { BusinessInfo } from '@/components/invoices/BusinessInfo';
+import { ClientInfo } from '@/components/invoices/ClientInfo';
+import { PaymentDetails } from '@/components/invoices/PaymentDetails';
+import { InvoiceItemsTable } from '@/components/invoices/InvoiceItemsTable';
+import { Notes } from '@/components/invoices/Notes';
 
 interface CompactGridLayoutProps {
   invoice: InvoiceData;
+  onUpdate?: (id: string, updates: Partial<InvoiceData>) => void;
+  isGenerating?: boolean;
 }
 
-export function CompactGridLayout({ invoice }: CompactGridLayoutProps) {
+export function CompactGridLayout({ invoice, onUpdate, isGenerating = false }: CompactGridLayoutProps) {
+  const handleUpdate = (field: keyof InvoiceData, value: string) => {
+    if (onUpdate && invoice.id) {
+      onUpdate(invoice.id, { [field]: value });
+    }
+  };
+
+  // Check if payment details have any content
+  const hasPaymentDetailsContent = hasPaymentDetails(invoice);
+
   const total = calculateTotal(invoice.items);
+
+  const inputStyle: React.CSSProperties = {
+    border: 'none',
+    background: 'transparent',
+    padding: '2px 4px',
+    margin: '-2px -4px',
+    width: '100%',
+    outline: 'none',
+    fontFamily: 'inherit',
+    fontSize: 'inherit',
+    color: 'inherit',
+    lineHeight: 'inherit',
+    fontWeight: 'inherit',
+    transition: 'background 0.15s ease',
+  };
 
   return (
     <div style={{
@@ -38,159 +70,147 @@ export function CompactGridLayout({ invoice }: CompactGridLayoutProps) {
           </div>
         </div>
 
-        <div style={{
-          background: '#ddd6fe',
-          padding: '20px',
-        }}>
-          <div style={{
-            fontSize: '10px',
-            fontWeight: '700',
-            letterSpacing: '1px',
-            color: '#5b21b6',
-            marginBottom: '8px',
-          }}>FROM</div>
-          <div style={{ fontSize: '13px', color: '#4c1d95', lineHeight: '1.6' }}>
-            {invoice.businessName && (
-              <div style={{ fontWeight: '600' }}>
-                {invoice.businessName}
-              </div>
-            )}
-            {invoice.businessEmail && <div style={{ fontSize: '11px' }}>{invoice.businessEmail}</div>}
-          </div>
+        <div style={{ background: '#ddd6fe', padding: '20px' }}>
+          <BusinessInfo
+            invoice={invoice}
+            onUpdate={handleUpdate}
+            inputHoverColor="rgba(91, 33, 182, 0.15)"
+            isLoading={isGenerating}
+            styles={{
+              label: {
+                fontSize: '10px',
+                fontWeight: '700',
+                letterSpacing: '1px',
+                color: '#5b21b6',
+                marginBottom: '8px',
+              },
+              content: { fontSize: '13px', color: '#4c1d95', lineHeight: '1.6' },
+              nameStyle: { fontWeight: '600' },
+              fieldStyle: { fontSize: '11px' },
+              addressStyle: {},
+            }}
+          />
         </div>
 
-        <div style={{
-          background: '#ccfbf1',
-          padding: '20px',
-        }}>
-          <div style={{
-            fontSize: '10px',
-            fontWeight: '700',
-            letterSpacing: '1px',
-            color: '#115e59',
-            marginBottom: '8px',
-          }}>TO</div>
-          <div style={{ fontSize: '13px', color: '#134e4a', lineHeight: '1.6' }}>
-            {invoice.clientName && (
-              <div style={{ fontWeight: '600' }}>
-                {invoice.clientName}
-              </div>
-            )}
-            {invoice.clientEmail && <div style={{ fontSize: '11px' }}>{invoice.clientEmail}</div>}
-          </div>
+        <div style={{ background: '#ccfbf1', padding: '20px' }}>
+          <ClientInfo
+            invoice={invoice}
+            onUpdate={handleUpdate}
+            inputHoverColor="rgba(17, 94, 89, 0.15)"
+            isLoading={isGenerating}
+            styles={{
+              label: {
+                fontSize: '10px',
+                fontWeight: '700',
+                letterSpacing: '1px',
+                color: '#115e59',
+                marginBottom: '8px',
+              },
+              content: { fontSize: '13px', color: '#134e4a', lineHeight: '1.6' },
+              nameStyle: { fontWeight: '600' },
+              fieldStyle: { fontSize: '11px' },
+              addressStyle: {},
+            }}
+          />
         </div>
       </div>
 
       {/* Address Grid */}
-      {(invoice.businessAddress || invoice.clientAddress || invoice.businessPhone || invoice.clientPhone) && (
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '20px',
+        marginBottom: '30px',
+      }}>
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '20px',
-          marginBottom: '30px',
+          background: '#f5f3ff',
+          padding: '15px',
+          fontSize: '12px',
+          color: '#5b21b6',
+          lineHeight: '1.6',
         }}>
-          {(invoice.businessAddress || invoice.businessPhone) && (
-            <div style={{
-              background: '#f5f3ff',
-              padding: '15px',
-              fontSize: '12px',
-              color: '#5b21b6',
-              lineHeight: '1.6',
-            }}>
-              {invoice.businessAddress && <div>{invoice.businessAddress}</div>}
-              {invoice.businessPhone && <div>Tel: {invoice.businessPhone}</div>}
-            </div>
-          )}
-          {(invoice.clientAddress || invoice.clientPhone) && (
-            <div style={{
-              background: '#f0fdfa',
-              padding: '15px',
-              fontSize: '12px',
-              color: '#115e59',
-              lineHeight: '1.6',
-            }}>
-              {invoice.clientAddress && <div>{invoice.clientAddress}</div>}
-              {invoice.clientPhone && <div>Tel: {invoice.clientPhone}</div>}
-            </div>
-          )}
+          <div>
+            <input
+              type="text"
+              value={invoice.businessAddress}
+              onChange={(e) => handleUpdate('businessAddress', (e.target as HTMLInputElement).value)}
+              placeholder="Business address"
+              style={inputStyle}
+              onMouseEnter={(e) => Object.assign((e.target as HTMLInputElement).style, { background: 'rgba(91, 33, 182, 0.1)', borderRadius: '3px' })}
+              onMouseLeave={(e) => (e.target as HTMLInputElement).style.background = 'transparent'}
+            />
+          </div>
+          <div>
+            Tel: <input
+              type="tel"
+              value={invoice.businessPhone}
+              onChange={(e) => handleUpdate('businessPhone', (e.target as HTMLInputElement).value)}
+              placeholder="Phone"
+              style={{ ...inputStyle, width: 'calc(100% - 35px)', display: 'inline-block' }}
+              onMouseEnter={(e) => Object.assign((e.target as HTMLInputElement).style, { background: 'rgba(91, 33, 182, 0.1)', borderRadius: '3px' })}
+              onMouseLeave={(e) => (e.target as HTMLInputElement).style.background = 'transparent'}
+            />
+          </div>
         </div>
-      )}
+        <div style={{
+          background: '#f0fdfa',
+          padding: '15px',
+          fontSize: '12px',
+          color: '#115e59',
+          lineHeight: '1.6',
+        }}>
+          <div>
+            <input
+              type="text"
+              value={invoice.clientAddress}
+              onChange={(e) => handleUpdate('clientAddress', (e.target as HTMLInputElement).value)}
+              placeholder="Client address"
+              style={inputStyle}
+              onMouseEnter={(e) => Object.assign((e.target as HTMLInputElement).style, { background: 'rgba(17, 94, 89, 0.1)', borderRadius: '3px' })}
+              onMouseLeave={(e) => (e.target as HTMLInputElement).style.background = 'transparent'}
+            />
+          </div>
+          <div>
+            Tel: <input
+              type="tel"
+              value={invoice.clientPhone}
+              onChange={(e) => handleUpdate('clientPhone', (e.target as HTMLInputElement).value)}
+              placeholder="Phone"
+              style={{ ...inputStyle, width: 'calc(100% - 35px)', display: 'inline-block' }}
+              onMouseEnter={(e) => Object.assign((e.target as HTMLInputElement).style, { background: 'rgba(17, 94, 89, 0.1)', borderRadius: '3px' })}
+              onMouseLeave={(e) => (e.target as HTMLInputElement).style.background = 'transparent'}
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Items Compact Table */}
-      <div style={{
-        background: '#fafafa',
-        padding: '20px',
-        marginBottom: '20px',
-      }}>
-        <table style={{
-          width: '100%',
-          borderCollapse: 'collapse',
-          fontSize: '13px',
-        }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid #e5e5e5' }}>
-              <th style={{
-                textAlign: 'left',
-                padding: '10px 0',
-                fontWeight: '700',
-                fontSize: '10px',
-                letterSpacing: '1px',
-                color: '#737373',
-              }}>DESCRIPTION</th>
-              <th style={{
-                textAlign: 'center',
-                padding: '10px',
-                fontWeight: '700',
-                fontSize: '10px',
-                letterSpacing: '1px',
-                color: '#737373',
-                width: '60px',
-              }}>QTY</th>
-              <th style={{
-                textAlign: 'right',
-                padding: '10px',
-                fontWeight: '700',
-                fontSize: '10px',
-                letterSpacing: '1px',
-                color: '#737373',
-                width: '100px',
-              }}>PRICE</th>
-              <th style={{
-                textAlign: 'right',
-                padding: '10px 0',
-                fontWeight: '700',
-                fontSize: '10px',
-                letterSpacing: '1px',
-                color: '#737373',
-                width: '100px',
-              }}>TOTAL</th>
-            </tr>
-          </thead>
-          <tbody>
-            {invoice.items.map((item, index) => {
-              const quantity = item.quantity || 0;
-              const unitPrice = item.unitPrice || 0;
-              const total = quantity * unitPrice;
-              
-              return (
-                <tr key={index} style={{ borderBottom: '1px solid #f5f5f5' }}>
-                  <td style={{ padding: '12px 0', color: '#262626' }}>
-                    {item.description}
-                  </td>
-                  <td style={{ textAlign: 'center', padding: '12px', color: '#525252' }}>
-                    {quantity}
-                  </td>
-                  <td style={{ textAlign: 'right', padding: '12px', color: '#525252' }}>
-                    ${formatCurrency(unitPrice)}
-                  </td>
-                  <td style={{ textAlign: 'right', padding: '12px 0', color: '#262626', fontWeight: '600' }}>
-                    ${formatCurrency(total)}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      <div style={{ background: '#fafafa', padding: '20px', marginBottom: '20px' }}>
+        <InvoiceItemsTable
+          items={invoice.items}
+          isLoading={isGenerating}
+          styles={{
+            table: {
+              width: '100%',
+              borderCollapse: 'collapse',
+              fontSize: '13px',
+            },
+            headerRow: { borderBottom: '2px solid #e5e5e5' },
+            headerCell: {
+              textAlign: 'left',
+              padding: '10px 0',
+              fontWeight: '700',
+              fontSize: '10px',
+              letterSpacing: '1px',
+              color: '#737373',
+            },
+            bodyRow: { borderBottom: '1px solid #f5f5f5' },
+            descriptionCell: { padding: '12px 0', color: '#262626' },
+            quantityCell: { textAlign: 'center', padding: '12px', color: '#525252' },
+            priceCell: { textAlign: 'right', padding: '12px', color: '#525252', width: '100px' },
+            totalCell: { textAlign: 'right', padding: '12px 0', color: '#262626', fontWeight: '600', width: '100px' },
+          }}
+        />
       </div>
 
       {/* Footer Grid */}
@@ -200,51 +220,54 @@ export function CompactGridLayout({ invoice }: CompactGridLayoutProps) {
         gap: '20px',
       }}>
         {/* Payment Info */}
-        <div>
-          {(invoice.bankName || invoice.bankAccountNumber || invoice.paymentInstructions) && (
-            <div style={{
-              background: '#fff7ed',
-              padding: '15px',
-            }}>
-              <div style={{
-                fontSize: '10px',
-                fontWeight: '700',
-                letterSpacing: '1px',
-                color: '#9a3412',
-                marginBottom: '8px',
-              }}>PAYMENT</div>
-              <div style={{ fontSize: '12px', color: '#7c2d12', lineHeight: '1.6' }}>
-                {invoice.bankName && <div>{invoice.bankName}</div>}
-                {invoice.bankAccountNumber && <div>Acc: {invoice.bankAccountNumber}</div>}
-                {invoice.bankAccountType && <div>{invoice.bankAccountType}</div>}
-                {invoice.paymentInstructions && (
-                  <div style={{ marginTop: invoice.bankName || invoice.bankAccountNumber ? '8px' : '0', whiteSpace: 'pre-line' }}>
-                    {invoice.paymentInstructions}
-                  </div>
-                )}
-              </div>
+        {hasPaymentDetailsContent && (
+          <div>
+            <div style={{ background: '#fff7ed', padding: '15px' }}>
+              <PaymentDetails
+                invoice={invoice}
+                onUpdate={handleUpdate}
+                inputHoverColor="rgba(154, 52, 18, 0.1)"
+                isLoading={isGenerating}
+                compact={true}
+                labelText="PAYMENT"
+                styles={{
+                  label: {
+                    fontSize: '10px',
+                    fontWeight: '700',
+                    letterSpacing: '1px',
+                    color: '#9a3412',
+                    marginBottom: '8px',
+                  },
+                  content: { fontSize: '12px', color: '#7c2d12', lineHeight: '1.6' },
+                  fieldStyle: {},
+                  textareaStyle: { marginTop: '8px' },
+                }}
+              />
             </div>
-          )}
-          {invoice.notes && (
-            <div style={{
+          </div>
+        )}
+        <Notes 
+          invoice={invoice}
+          styles={{
+            container: { 
               background: '#fef9c3',
               padding: '15px',
-              marginTop: invoice.bankName ? '10px' : '0',
-            }}>
-              <div style={{
-                fontSize: '10px',
-                fontWeight: '700',
-                letterSpacing: '1px',
-                color: '#713f12',
-                marginBottom: '8px',
-              }}>NOTES</div>
-              <div style={{ fontSize: '12px', color: '#854d0e', lineHeight: '1.6' }}>
-                {invoice.notes}
-              </div>
-            </div>
-          )}
-        </div>
-
+              marginTop: hasPaymentDetailsContent ? '10px' : '0',
+            },
+            label: { 
+              fontSize: '10px',
+              fontWeight: '700',
+              letterSpacing: '1px',
+              color: '#713f12',
+            },
+            content: { 
+              fontSize: '12px', 
+              color: '#854d0e',
+              lineHeight: '1.6',
+            },
+          }}
+        />
+        
         {/* Total */}
         <div style={{
           background: '#18181b',

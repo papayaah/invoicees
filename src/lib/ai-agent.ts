@@ -16,17 +16,20 @@ When the user provides details, identify only what is explicitly stated and retu
     "businessName": "company name if mentioned",
     "clientName": "client name if mentioned",
     "items": [{"description": "item", "unitPrice": number, "quantity": 1}],
-    "paymentInstructions": "bank or payment details if provided",
+    "paymentInstructions": "all payment details in one field (bank info, due dates, payment methods, etc.)",
     "notes": "any extra details that don't fit standard fields"
   }
 }
 
-Rules:
-- Only include fields that the user mentioned or changed.
-- Never invent names, prices, or quantities.
-- Place all unrecognized or unrelated information in "notes".
-- Keep responses conversational but concise — you're part of a chat experience.
-- If the user’s message isn’t about an invoice, politely redirect them back to invoice-related tasks.`;
+CRITICAL RULES:
+- ALWAYS use the exact field names: "businessName", "clientName", "items", "paymentInstructions", "notes"
+- NEVER use "business", "client", "total" - these are wrong field names
+- "items" must ALWAYS be an array of objects, never a number
+- Only include fields that the user mentioned or changed
+- Never invent names, prices, or quantities
+- Place all unrecognized or unrelated information in "notes"
+- Keep responses conversational but concise — you're part of a chat experience
+- If the user's message isn't about an invoice, politely redirect them back to invoice-related tasks`;
 
 /**
  * Parse AI response and extract JSON
@@ -208,10 +211,170 @@ export function mergeInvoiceUpdate(
     update.clientName = update.client;
   }
   
+  // Filter out "Undefined" values
+  if (update.businessName === 'Undefined' || update.businessName === 'undefined') {
+    console.warn('⚠️ AI returned "Undefined" for businessName - ignoring');
+    delete update.businessName;
+  }
+  
+  if (update.clientName === 'Undefined' || update.clientName === 'undefined') {
+    console.warn('⚠️ AI returned "Undefined" for clientName - ignoring');
+    delete update.clientName;
+  }
+  
+  // Handle items field - AI sometimes returns number instead of array
+  if (typeof update.items === 'number') {
+    console.warn('⚠️ AI returned items as number instead of array - trying to extract from invoiceDetails');
+    
+    // Try to extract items from invoiceDetails if it exists
+    if (update.invoiceDetails && update.invoiceDetails.description) {
+      const description = update.invoiceDetails.description;
+      console.log('🔍 Extracting item from invoiceDetails.description:', description);
+      
+      // Create a single item from the description
+      update.items = [{
+        description: description,
+        quantity: 1,
+        price: update.total || 0
+      }];
+      
+      console.log('✅ Created item from invoiceDetails.description:', update.items);
+    } else if (update.description) {
+      // Try to extract from root level description field
+      const description = update.description;
+      console.log('🔍 Extracting item from root description:', description);
+      
+      // Create a single item from the description
+      update.items = [{
+        description: description,
+        quantity: 1,
+        price: update.total || 0
+      }];
+      
+      console.log('✅ Created item from root description:', update.items);
+    } else {
+      console.warn('⚠️ No description found in invoiceDetails or root level, ignoring items');
+      delete update.items;
+    }
+  }
+  
+  // Handle total field - we calculate this ourselves
+  if (update.total !== undefined) {
+    console.warn('⚠️ AI returned total field - ignoring (we calculate this)');
+    delete update.total;
+  }
+  
+  // Handle nested payment instructions in invoiceDetails
+  if (update.invoiceDetails && update.invoiceDetails.paymentInstructions && !update.paymentInstructions) {
+    const paymentInfo = update.invoiceDetails.paymentInstructions;
+    console.log('🔍 Extracting payment instructions from invoiceDetails:', paymentInfo);
+    
+    // Convert object to readable string
+    if (typeof paymentInfo === 'object') {
+      const paymentFields: string[] = [];
+      Object.entries(paymentInfo).forEach(([key, value]) => {
+        if (value) {
+          const formattedKey = key.replace(/[_-]/g, ' ').replace(/([A-Z])/g, ' $1').trim();
+          const capitalizedKey = formattedKey.charAt(0).toUpperCase() + formattedKey.slice(1);
+          paymentFields.push(`${capitalizedKey}: ${value}`);
+        }
+      });
+      update.paymentInstructions = paymentFields.join('\n');
+    } else {
+      update.paymentInstructions = String(paymentInfo);
+    }
+    
+    console.log('✅ Created payment instructions:', update.paymentInstructions);
+  }
+  
+  // Handle paymentInfo field (AI sometimes uses this instead of paymentInstructions)
+  if (update.paymentInfo && !update.paymentInstructions) {
+    const paymentInfo = update.paymentInfo;
+    console.log('🔍 Extracting payment instructions from paymentInfo:', paymentInfo);
+    
+    // Convert object to readable string
+    if (typeof paymentInfo === 'object') {
+      const paymentFields: string[] = [];
+      Object.entries(paymentInfo).forEach(([key, value]) => {
+        if (value) {
+          const formattedKey = key.replace(/[_-]/g, ' ').replace(/([A-Z])/g, ' $1').trim();
+          const capitalizedKey = formattedKey.charAt(0).toUpperCase() + formattedKey.slice(1);
+          paymentFields.push(`${capitalizedKey}: ${value}`);
+        }
+      });
+      update.paymentInstructions = paymentFields.join('\n');
+    } else {
+      update.paymentInstructions = String(paymentInfo);
+    }
+    
+    console.log('✅ Created payment instructions from paymentInfo:', update.paymentInstructions);
+  }
+  
+  // Handle paymentDetails field (AI sometimes uses this instead of paymentInstructions)
+  if (update.paymentDetails && !update.paymentInstructions) {
+    const paymentInfo = update.paymentDetails;
+    console.log('🔍 Extracting payment instructions from paymentDetails:', paymentInfo);
+    
+    // Convert object to readable string
+    if (typeof paymentInfo === 'object') {
+      const paymentFields: string[] = [];
+      Object.entries(paymentInfo).forEach(([key, value]) => {
+        if (value) {
+          const formattedKey = key.replace(/[_-]/g, ' ').replace(/([A-Z])/g, ' $1').trim();
+          const capitalizedKey = formattedKey.charAt(0).toUpperCase() + formattedKey.slice(1);
+          paymentFields.push(`${capitalizedKey}: ${value}`);
+        }
+      });
+      update.paymentInstructions = paymentFields.join('\n');
+    } else {
+      update.paymentInstructions = String(paymentInfo);
+    }
+    
+    console.log('✅ Created payment instructions from paymentDetails:', update.paymentInstructions);
+  }
+
+  // Handle paymentOptions field (nested shape often returned by AI)
+  if (update.paymentOptions && !update.paymentInstructions) {
+    const paymentInfo = update.paymentOptions;
+    console.log('🔍 Extracting payment instructions from paymentOptions:', paymentInfo);
+
+    const paymentLines: string[] = [];
+    const pushEntry = (key: string, value: any) => {
+      if (value === undefined || value === null || String(value).trim() === '') return;
+      const formattedKey = key.replace(/[_-]/g, ' ').replace(/([A-Z])/g, ' $1').trim();
+      const capitalizedKey = formattedKey.charAt(0).toUpperCase() + formattedKey.slice(1);
+      paymentLines.push(`${capitalizedKey}: ${value}`);
+    };
+
+    if (typeof paymentInfo === 'object') {
+      Object.entries(paymentInfo).forEach(([key, value]) => {
+        if (typeof value === 'object' && value !== null) {
+          Object.entries(value as Record<string, unknown>).forEach(([k, v]) => pushEntry(k, v));
+        } else {
+          pushEntry(key, value);
+        }
+      });
+      if (paymentLines.length > 0) {
+        update.paymentInstructions = paymentLines.join('\n');
+      }
+    }
+
+    console.log('✅ Created payment instructions from paymentOptions:', update.paymentInstructions);
+  }
+  
+  // Do not inject dueDate into paymentInstructions automatically; keep them separate
+
   // Handle payment fields - construct paymentInstructions if AI didn't provide it
   if (!update.paymentInstructions) {
     const paymentFields: string[] = [];
-    
+
+    const pushKV = (k: string, v: any) => {
+      if (v === undefined || v === null || String(v).trim() === '') return;
+      const formattedKey = k.replace(/[_-]/g, ' ').replace(/([A-Z])/g, ' $1').trim();
+      const capitalizedKey = formattedKey.charAt(0).toUpperCase() + formattedKey.slice(1);
+      paymentFields.push(`${capitalizedKey}: ${v}`);
+    };
+
     // Search for ANY field that might contain payment info
     Object.keys(update).forEach(key => {
       const lowerKey = key.toLowerCase();
@@ -219,7 +382,7 @@ export function mergeInvoiceUpdate(
       
       // Skip known non-payment fields
       if (['businessname', 'business', 'clientname', 'client', 'clientemail', 'businessemail', 
-           'items', 'notes', 'message', 'description'].includes(lowerKey)) {
+           'items', 'notes', 'message', 'description', 'duedate'].includes(lowerKey)) {
         return;
       }
       
@@ -228,28 +391,31 @@ export function mergeInvoiceUpdate(
         lowerKey.includes('payment') || lowerKey.includes('pay') || 
         lowerKey.includes('wallet') || lowerKey.includes('bitcoin') || 
         lowerKey.includes('crypto') || lowerKey.includes('venmo') ||
-        lowerKey.includes('paypal') || lowerKey.includes('due') ||
-        (lowerKey.includes('account') && !lowerKey.includes('bank'));
+        lowerKey.includes('paypal') || lowerKey.includes('bank') ||
+        lowerKey.includes('account') || lowerKey.includes('routing') ||
+        lowerKey.includes('iban') || lowerKey.includes('swift') || lowerKey.includes('wise');
       
-      if (isPaymentField) {
-        
-        if (typeof value === 'object' && value !== null) {
-          // Nested object - flatten it
-          Object.entries(value).forEach(([k, v]) => {
-            paymentFields.push(`${k}: ${v}`);
-          });
-        } else if (value) {
-          // Simple value
-          const formattedKey = key.replace(/[_-]/g, ' ').replace(/([A-Z])/g, ' $1').trim();
-          const capitalizedKey = formattedKey.charAt(0).toUpperCase() + formattedKey.slice(1);
-          paymentFields.push(`${capitalizedKey}: ${value}`);
-        }
+      if (!isPaymentField) return;
+
+      if (Array.isArray(value)) {
+        // Arrays: render each item on its own lines without index labels
+        value.forEach(item => {
+          if (typeof item === 'object' && item !== null) {
+            Object.entries(item).forEach(([k, v]) => pushKV(k, v));
+          } else {
+            pushKV(key, item);
+          }
+        });
+      } else if (typeof value === 'object' && value !== null) {
+        // Single object - flatten it
+        Object.entries(value).forEach(([k, v]) => pushKV(k, v));
+      } else if (value) {
+        // Simple value
+        pushKV(key, value);
       }
     });
-    
+
     if (paymentFields.length > 0) {
-      console.warn('⚠️ AI used separate payment fields - constructing paymentInstructions:');
-      console.warn(paymentFields);
       update.paymentInstructions = paymentFields.join('\n');
     }
   }
@@ -375,7 +541,8 @@ export function mergeInvoiceUpdate(
     merged.items = [...merged.items, ...normalizedItems];
     console.log(`\n✅ Added ${normalizedItems.length} item(s) to invoice`);
   } else if (update.items !== undefined) {
-    console.error('❌ AI returned invalid items format. Expected array, got:', typeof update.items, update.items);
+    console.warn('⚠️ AI returned invalid items format. Expected array, got:', typeof update.items, update.items);
+    console.warn('⚠️ Ignoring invalid items field - invoice will keep existing items');
   }
 
   console.log('🎉 Final merged invoice:', JSON.stringify(merged, null, 2));
