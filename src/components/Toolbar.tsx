@@ -1,6 +1,6 @@
 import { useState } from 'preact/hooks';
 import { InvoiceLayout } from '@/types/invoice';
-import { IconFileDownload, IconRefresh, IconChevronUp, IconChevronDown, IconX, IconHeart } from '@tabler/icons-react';
+import { IconFileDownload, IconRefresh, IconChevronUp, IconChevronDown, IconX, IconHeart, IconSparkles, IconRocket, IconBulb, IconLifebuoy, IconBrandGithub, IconBrandX } from '@tabler/icons-react';
 
 interface ToolbarProps {
   currentLayout: InvoiceLayout;
@@ -132,26 +132,136 @@ export function Toolbar({ currentLayout, onLayoutChange, onExportPDF, onReset }:
                   About Invoicees
                 </h2>
                 
-                <p style={{
+                <div style={{
                   fontSize: '15px',
                   lineHeight: '1.8',
                   color: '#4b5563',
-                  marginBottom: '16px',
+                  marginBottom: '20px',
                 }}>
-                  I built Invoicees because I wanted to make invoicing simple and delightful.
-                  As a developer and freelancer, I know how tedious it can be to create professional invoices. 
-                  So I created this tool powered by Chrome's built-in AI to help you generate beautiful invoices 
-                  in seconds, right in your browser—no servers, no logins, completely private.
-                </p>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '16px' }}>
+                    <IconSparkles size={20} stroke="#a855f7" style={{ flexShrink: 0, marginTop: '2px' }} />
+                    <p style={{ margin: 0 }}>
+                      I built Invoicees because I wanted to make invoicing simple and delightful.
+                      As a developer and freelancer, I know how tedious it can be to create professional invoices.
+                    </p>
+                  </div>
 
-                <p style={{
-                  fontSize: '15px',
-                  lineHeight: '1.8',
-                  color: '#4b5563',
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '16px' }}>
+                    <IconRocket size={20} stroke="#a855f7" style={{ flexShrink: 0, marginTop: '2px' }} />
+                    <p style={{ margin: 0 }}>
+                      Powered by Chrome's built-in AI, it generates invoices in seconds, 
+                      right in your browser—no servers, no logins, completely private.
+                    </p>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '16px' }}>
+                    <IconHeart size={20} stroke="#e57373" fill="#e57373" style={{ flexShrink: 0, marginTop: '2px' }} />
+                    <p style={{ margin: 0 }}>
+                      Thank you so much for using Invoicees. It truly means the world to me! 
+                      I hope it saves you time and brings a little joy to your workflow.
+                    </p>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                    <IconBulb size={20} stroke="#a855f7" style={{ flexShrink: 0, marginTop: '2px' }} />
+                    <p style={{ margin: 0 }}>
+                      Made with love at <a 
+                        href="https://www.strostudio.com" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        style={{ 
+                          color: '#a855f7', 
+                          textDecoration: 'none', 
+                          fontWeight: '600',
+                          borderBottom: '1px solid #a855f7'
+                        }}
+                      >Stro Studio</a> — Small apps, big heart.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Support & Resources Section */}
+                <div style={{
+                  marginTop: '24px',
+                  paddingTop: '20px',
+                  borderTop: '1px solid #e5e7eb',
                 }}>
-                  Thank you so much for using Invoicees. It truly means the world to me! 
-                  I hope it saves you time and brings a little joy to your workflow.
-                </p>
+                  <h3 style={{
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    color: '#1f2937',
+                    marginBottom: '12px',
+                    letterSpacing: '0.5px',
+                  }}>
+                    SUPPORT & RESOURCES
+                  </h3>
+
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px',
+                  }}>
+                    <a
+                      href="https://strostudio.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        color: '#4b5563',
+                        textDecoration: 'none',
+                        fontSize: '14px',
+                        transition: 'color 0.2s',
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.color = '#a855f7'}
+                      onMouseLeave={(e) => e.currentTarget.style.color = '#4b5563'}
+                    >
+                      <IconLifebuoy size={18} stroke="#a855f7" />
+                      <span>Support</span>
+                    </a>
+
+                    <a
+                      href="https://github.com/papayaah/invoicees"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        color: '#4b5563',
+                        textDecoration: 'none',
+                        fontSize: '14px',
+                        transition: 'color 0.2s',
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.color = '#a855f7'}
+                      onMouseLeave={(e) => e.currentTarget.style.color = '#4b5563'}
+                    >
+                      <IconBrandGithub size={18} stroke="#a855f7" />
+                      <span>GitHub</span>
+                    </a>
+
+                    <a
+                      href="https://x.com/papayaahtries"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        color: '#4b5563',
+                        textDecoration: 'none',
+                        fontSize: '14px',
+                        transition: 'color 0.2s',
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.color = '#a855f7'}
+                      onMouseLeave={(e) => e.currentTarget.style.color = '#4b5563'}
+                    >
+                      <IconBrandX size={18} stroke="#a855f7" />
+                      <span>Follow @papayaahtries</span>
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

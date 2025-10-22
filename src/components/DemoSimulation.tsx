@@ -533,7 +533,7 @@ export function DemoSimulation(_props: DemoSimulationProps) {
                   }}>
                     I built Invoicees because I wanted to make invoicing simple and delightful. 
                     As a developer and freelancer, I know how tedious it can be to create professional invoices. 
-                    So I created this tool powered by Chrome's built-in AI to help you generate beautiful invoices 
+                    So I created this tool powered by Chrome's built-in AI to help you generate invoices 
                     in seconds, right in your browser—no servers, no logins, completely private.
                   </p>
 
@@ -764,7 +764,7 @@ export function DemoSimulation(_props: DemoSimulationProps) {
                   }}>
                     I built Invoicees because I wanted to make invoicing simple and delightful. 
                     As a developer and freelancer, I know how tedious it can be to create professional invoices. 
-                    So I created this tool powered by Chrome's built-in AI to help you generate beautiful invoices 
+                    So I created this tool powered by Chrome's built-in AI to help you generate invoices 
                     in seconds, right in your browser—no servers, no logins, completely private.
                   </p>
 
